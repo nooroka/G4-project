@@ -1,0 +1,16 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        expand("/data/nooroka/grant/punkt1/control/bed/control_set_{number}_39_my_minus.bed", number = SAMPLES)    
+rule subtract:
+     input:
+       x1 = "/data/nooroka/grant/punkt1/hg19/hg19_new_{number}.bed", 
+       x2 ="/data/nooroka/grant/punkt1/GSM/GSM_hg196_un_{number}_39_my_minus.bed"
+     output:
+      "/data/nooroka/grant/punkt1/control/bed/control_set_{number}_39_my_minus.bed"
+     shell:
+       """
+       bedtools subtract -a {input.x1} -b {input.x2} > {output}
+       """
+ 

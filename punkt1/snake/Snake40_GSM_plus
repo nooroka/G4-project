@@ -1,0 +1,33 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+       expand("../../GSM/GSM_hg196_un_{number}_40_my_plus.bed",number = SAMPLES)
+
+
+rule split2:
+     input:
+        "../../GSM3003540/GSM3003540_quadr_7_6_plus.bed"
+     output:
+        "../../GSM/GSM_hg196_40_my_plus.bed"
+     shell:
+        """
+        python ../scripts/split2.py {input} {output}
+        """
+rule uniq:
+     input:
+         rules.split2.output
+     output:
+         "../../GSM/GSM_hg196_un_40_my_plus.bed"
+     shell:
+         "uniq {input} > {output}"
+rule sp31:
+     input:
+        rules.uniq.output
+     output:
+        "../../GSM/GSM_hg196_un_{number}_40_my_plus.bed"
+     shell:
+        """
+        python ../scripts/split3.py {input} {output} {wildcards.number}
+        """
+

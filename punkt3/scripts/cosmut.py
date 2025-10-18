@@ -13,7 +13,7 @@ for line in op:
         sum22=int(line[2])-int(line[1]) #interval length for the all genome, except genes
         sum1+=sum22
 op.close()  
-d1 = subprocess.check_output("wc -l {}".format(sys.argv[2]),shell = True)
+d1 = subprocess.check_output("wc -l {}".format(sys.argv[2]),shell = True) #число мутаций на длину квадруплекса
 #d1 = subprocess.check_output('wc -l mutcos40/mutcosquadr{}_40.bed'.format(i),shell = True)#number of mutations
 d11 = d1.decode().split()[0]
 w.write("chr{}".format(sys.argv[4])+"\t"+str(float(int(d11)/int(sum1)))+"\n")#  

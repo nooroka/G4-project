@@ -1,0 +1,42 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        expand("../merged/quadr7_chain180424_plus2_sorted_{number}_40.bed",number = SAMPLES),
+  
+
+rule count1:
+     input:
+         "../../GSM3003540/GSM3003540_quadr_7_6_plus.bed"
+     output: 
+         "../quadr7_chain180424_40_plus.bed"
+     shell:
+         "python ../scripts/count.py {input} {output}"
+rule merge:
+     input:
+       rules.count1.output
+     output:
+       x1 = "../quadr7_chain180424_plus_40.bed"
+     shell:
+          """
+          bash ../scripts/merge.sh {input}  {output}
+          """
+rule bedtools:
+     input:
+        rules.merge.output
+     output:
+        "../merged/quadr7_chain180424_plus2_sorted_40.bed"
+     shell:
+        """
+        bedtools sort -i {input} > {output}
+        """
+
+rule split:	
+     input:
+        rules.bedtools.output
+     output:
+       	"../merged/quadr7_chain180424_plus2_sorted_{number}_40.bed"
+     shell:
+        """
+        python ../scripts/split.py {input} {output} {wildcards.number}
+        """
