@@ -2,7 +2,7 @@ SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16
 
 rule all:
      input:
-       expand("../densities/densitiesGSM40_percent-2609_snp_control1.txt")
+       expand("../densities3_final/densitiesGSM40_percent-1209_snp_control1.txt")
                                                                                         
      
 
@@ -12,16 +12,16 @@ rule script2:
         "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_40.bed",
         "../gccoords/control/gccoords_percents_{number3}_my_40_all_control1.txt"
      output:
-        "../densities/densitiesGSM40_percent{number3}-2609_snp_control1.txt"
+        "../densities3/densitiesGSM40_percent{number3}-1209_snp_control1.txt"
      shell:
          """
          python ../scripts/script2_40_snp_control1.py {input} {wildcards.number3} {output}
          """
 rule cat2:
      input:
-        expand("../densities/densitiesGSM40_percent{number3}-2609_snp_control1.txt",number3 = SAMPLES)
+        expand("../densities3/densitiesGSM40_percent{number3}-1209_snp_control1.txt",number3 = SAMPLES)
      output:
-        "../densities/densitiesGSM40_percent-2609_snp_control1.txt"
+        "../densities3_final/densitiesGSM40_percent-1209_snp_control1.txt"
      shell:
         "cat {input} > {output}"
 

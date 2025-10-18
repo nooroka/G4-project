@@ -1,0 +1,62 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        expand("../mutcos39_corrected/mutcosquadr_{number}_39_all_loop7_control3.bed",number = SAMPLES),
+        "../mutdensgene_quadr39_2-from_all_loop7_control3.txt",
+        "../mutdensgene_non_quadr39_2-from_all_loop7_control3.txt",
+        expand("../mutcos39_corrected/mutcos_non_quadr_{number}_39_all_loop7_control3.bed", number = SAMPLES),
+        
+                                                                                       
+
+rule sortrunnew5:
+    input:
+       x1 = "/data/nooroka/grant/punkt3/stage2/gccoords/quadr2/{number}_39_control3_cleaned.bed",
+       x2 = "/data/nooroka/grant/punkt3/sort_sort_sort3/sort_sort_sort_sort3/bed/un/{number}_2_sorted_un.bed"
+    output:
+       "../mutcos39_corrected/mutcosquadr_{number}_39_all_loop7_control3.bed"
+    shell:
+       "bash ../scripts/sortrunnew5.sh {input.x1} {input.x2} {output}"
+rule sortrunnew55:
+    input:
+       x1 = "../gccoords/def/gccoords_{number}_undefhg19_39_all_loop7_control3.bed",
+       x2 = "/data/nooroka/grant/punkt3/sort_sort_sort3/sort_sort_sort_sort3/bed/un/{number}_2_sorted_un.bed"
+    output:
+       "../mutcos39_corrected/mutcos_non_quadr_{number}_39_all_loop7_control3.bed"
+    shell:
+       "bash ../scripts/sortrunnew55.sh {input.x1} {input.x2} {output}"
+rule cosmut: 
+    input:
+       x1 = "/data/nooroka/grant/punkt3/stage2/gccoords/quadr2/{number}_39_control3_cleaned.bed",
+       x2 = "../mutcos39_corrected/mutcosquadr_{number}_39_all_loop7_control3.bed"
+    output:
+       "../mutdensgene_quadr39_2_{number}_all_loop7_control3.txt"
+    shell:
+       """
+       python ../scripts/cosmut.py {input.x1} {input.x2} {output} {wildcards.number}
+       """
+rule cosmut_non_quadr:
+    input:
+       x1 = "../gccoords/def/gccoords_{number}_undefhg19_39_all_loop7_control3.bed",
+       x2 = rules.sortrunnew55.output,
+       x3 = "../gccoords/filtered/max_all_39_{number}_control3.txt"
+    output:
+       "../mutdensgene_non_quadr39_2_{number}_all_loop7_control3.txt"
+    shell:
+       """
+       python ../scripts/cosmut_non_quadr.py {input.x3} {input.x1} {input.x2} {output} {wildcards.number}
+       """
+rule cat:
+     input:
+        x1 = expand("../mutdensgene_quadr39_2_{number}_all_loop7_control3.txt", number = SAMPLES),
+        x2 = expand("../mutdensgene_non_quadr39_2_{number}_all_loop7_control3.txt",number = SAMPLES)
+     output:
+        y1 = "../mutdensgene_quadr39_2-from_all_loop7_control3.txt",
+        y2 = "../mutdensgene_non_quadr39_2-from_all_loop7_control3.txt"
+     shell:
+        """
+        cat {input.x1} > {output.y1}
+        cat {input.x2} > {output.y2}
+        """
+
+

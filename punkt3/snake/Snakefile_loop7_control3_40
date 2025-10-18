@@ -2,21 +2,21 @@ SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16
 
 rule all:
      input:
-        "../densities/densitiesGSM40_percent-2409_subtract_from_all_loop7_control3.txt"
+        "../densities3_final/densities2GSM40_percent-1209_control3.txt"
 rule script2:
      input:
         "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_40.bed",
         "../gccoords/filtered/max_all_40_{number3}_control3.txt"
      output:
-        "../densities/densitiesGSM40_percent{number3}-2409_subtract_from_all_loop7_control3.txt"
+        "../densities3/densities2GSM40_percent{number3}-1209_control3.txt"
      shell:
          """
          python ../scripts/script2_40_all_control3.py {input} {wildcards.number3} {output}
          """
 rule cat2:
      input:
-        expand("../densities/densitiesGSM40_percent{number3}-2409_subtract_from_all_loop7_control3.txt",number3 = SAMPLES)
+        expand("../densities3/densities2GSM40_percent{number3}-1209_control3.txt",number3 = SAMPLES)
      output:
-        "../densities/densitiesGSM40_percent-2409_subtract_from_all_loop7_control3.txt"
+        "../densities3_final/densities2GSM40_percent-1209_control3.txt"
      shell:
         "cat {input} > {output}"

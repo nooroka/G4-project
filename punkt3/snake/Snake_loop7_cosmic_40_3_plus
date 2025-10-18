@@ -1,0 +1,53 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+rule all:
+     input:
+        "../mutdensgene_40_v3/final/mutdensgene_quadr40_2-from_all_loop7_control2_v3-3_plus.txt",
+        "../mutdensgene_40_v3/final/mutdensgene_non_quadr40_2-from_all_loop7_control2_v3-3_plus.txt",
+        expand( "../mutdensgene_40_v3/mutdensgene_quadr40_2_{number}_all_loop7_control2_v3-3_plus.txt", number = SAMPLES),
+        expand("../mutdensgene_40_v3/mutdensgene_non_quadr40_2_{number}_all_loop7_control2_v3-3_plus.txt",number = SAMPLES),
+        "../mutdensgene_40_v3/final/out_control2_40_quadr_plus.csv",
+        "../mutdensgene_40_v3/final/out_control2_40_non-quadr_plus.csv"
+
+                                                                                       
+
+rule sortrunnew5:
+    input:
+       x1 = "/data/nooroka/grant/punkt1/stage2/merged/quadr7_chain180424_plus2_sorted_{number}_40.bed",
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg.bed"
+    output:
+       "../mutdensgene_40_v3/mutdensgene_quadr40_2_{number}_all_loop7_control2_v3-3_plus.txt",
+    shell:
+       "bash ../scripts/sortrunnew5-3.sh {input.x1} {input.x2}  {output}"
+rule sortrunnew55:
+    input:
+       x1 = "../gccoords/def/gccoords_{number}_undefhg19_40_all_loop7_control2_plus.bed",
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg.bed"
+    output:
+       "../mutdensgene_40_v3/mutdensgene_non_quadr40_2_{number}_all_loop7_control2_v3-3_plus.txt",      
+    shell:
+       "bash ../scripts/sortrunnew55-3.sh {input.x1} {input.x2}  {output}"
+rule cat:
+     input:
+        x1 = expand("../mutdensgene_40_v3/mutdensgene_quadr40_2_{number}_all_loop7_control2_v3-3_plus.txt", number = SAMPLES),
+        x2 = expand("../mutdensgene_40_v3/mutdensgene_non_quadr40_2_{number}_all_loop7_control2_v3-3_plus.txt",number = SAMPLES)
+     output:
+        y1 = "../mutdensgene_40_v3/final/mutdensgene_quadr40_2-from_all_loop7_control2_v3-3_plus.txt",
+        y2 = "../mutdensgene_40_v3/final/mutdensgene_non_quadr40_2-from_all_loop7_control2_v3-3_plus.txt"
+     shell:
+        """
+        cat {input.x1} > {output.y1}
+        cat {input.x2} > {output.y2}
+        """
+
+rule density:
+      input:
+        x1 = "../mutdensgene_40_v3/final/mutdensgene_quadr40_2-from_all_loop7_control2_v3-3_plus.txt",
+        x2 = "../mutdensgene_40_v3/final/mutdensgene_non_quadr40_2-from_all_loop7_control2_v3-3_plus.txt"
+      output:
+        y1 = "../mutdensgene_40_v3/final/out_control2_40_quadr_plus.csv",
+        y2 = "../mutdensgene_40_v3/final/out_control2_40_non-quadr_plus.csv"
+      shell:
+      	"""
+      	python ../scripts/density_per_ch.py {input.x1} {output.y1}
+      	python ../scripts/density_per_ch.py {input.x2} {output.y2}
+      	"""	

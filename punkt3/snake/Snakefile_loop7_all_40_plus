@@ -1,0 +1,73 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        expand("/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_subtract_from_control2_plus_40.fasta",number3 = SAMPLES),
+        expand("../../../punkt1/stage2/merged/quadr7_chain180424_plus2_sorted_{number3}_40.bed",number3 = SAMPLES),
+        expand("../meanquadr/meanquadrhg19{number3}_my_40_subtract_from_control2_plus.txt", number3 = SAMPLES),
+        expand("../results/results_hg19_percents_{number3}_my_40_subtract_from_control2_plus.txt",number3 = SAMPLES),
+        expand("../gccoords/control/gccoords_percents_{number3}_my_40_subtract_from_control2_plus.txt",number3 = SAMPLES),
+        expand("../densities3_final/densitiesGSM40_percent-1209_subtract_from_control2_plus.txt")
+                                                                                        
+
+rule script4:
+    input:
+       "../../../punkt1/control/bed/control_set_{number3}_40_my_plus.bed",
+       "../../../punkt1/stage2/merged/quadr7_chain180424_plus2_sorted_{number3}_40.bed"
+    output:
+       "/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_subtract_from_control2_plus_40.fasta",
+    shell:
+       """
+       bash ../scripts/script4.sh {input} {output}
+       """
+rule mean: 
+    input:
+      "../../../punkt1/stage2/merged/quadr7_chain180424_plus2_sorted_{number3}_40.bed"
+    output:
+      "../meanquadr/meanquadrhg19{number3}_my_40_subtract_from_control2_plus.txt"
+    shell:
+      """
+      python ../scripts/mean.py {input} {output}
+      """
+
+rule cat:
+     input:
+       x1 = expand("../meanquadr/meanquadrhg19{number3}_my_40_subtract_from_control2_plus.txt", number3 = SAMPLES),
+       x2 = "/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_subtract_from_control2_plus_40.fasta",
+     output:
+       "../results/results_hg19_percents_{number3}_my_40_subtract_from_control2_plus.txt"
+     shell:
+       """
+       cat {input.x1} > ../meanquadr/meanquadrhg19_my_40_subtract_from_control2_plus.txt
+       python ../scripts/windowrun13.py ../meanquadr/meanquadrhg19_my_40_subtract_from_control2_plus.txt {input.x2}  {output} {wildcards.number3}
+       """ 
+
+
+rule coordsgc:
+     input:
+        rules.cat.output
+     output:
+        "../gccoords/control/gccoords_percents_{number3}_my_40_subtract_from_control2_plus.txt"
+     shell:
+        """
+        python ../scripts/coordsgc13.py {input} {output}
+        """
+
+rule script2:
+     input:
+        "../../../punkt1/stage2/merged/quadr7_chain180424_plus2_sorted_{number3}_40.bed",
+        rules.coordsgc.output
+     output:
+        "../densities3/densitiesGSM40_percent{number3}-1209_subtract_from_control2_plus.txt"
+     shell:
+         """
+         python ../scripts/script2_40_all_plus.py {input} {wildcards.number3} {output}
+         """
+rule cat2:
+     input:
+        expand("../densities3/densitiesGSM40_percent{number3}-1209_subtract_from_control2_plus.txt",number3 = SAMPLES)
+     output:
+        "../densities3_final/densitiesGSM40_percent-1209_subtract_from_control2_plus.txt"
+     shell:
+        "cat {input} > {output}"
+

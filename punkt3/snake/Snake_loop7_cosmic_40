@@ -2,57 +2,57 @@ SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16
 
 rule all:
      input:
-        expand("../mutcos40/mutcosquadr_{number}_40_all_loop7_control2.bed",number = SAMPLES),
-        "../mutdensgene_quadr40_2-from_all_loop7_control2.txt",
-        "../mutdensgene_non_quadr40_2-from_all_loop7_control2.txt",
-        expand("../mutcos40/mutcos_non_quadr_{number}_40_all_loop7_control2.bed", number = SAMPLES),
+        expand("../mutcos40_v3/mutcosquadr_{number}_40_all_loop7_control2_v3.bed",number = SAMPLES),
+        "../mutdensgene_40_v3/mutdensgene_quadr40_2-from_all_loop7_control2_v3.txt",
+        "../mutdensgene_40_v3/mutdensgene_non_quadr40_2-from_all_loop7_control2_v3.txt",
+        expand("../mutcos40_v3/mutcos_non_quadr_{number}_40_all_loop7_control2_v3.bed", number = SAMPLES),
         
                                                                                        
 
 rule sortrunnew5:
     input:
        x1 = "/data/nooroka/grant/punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number}_40.bed",
-       x2 = "/data/nooroka/grant/punkt3/sort_sort_sort3/sort_sort_sort_sort3/bed/un/{number}_2_sorted_un.bed"
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab.bed"
     output:
-       "../mutcos40/mutcosquadr_{number}_40_all_loop7_control2.bed"
+       "../mutcos40_v3/mutcosquadr_{number}_40_all_loop7_control2_v3.bed"
     shell:
-       "bash ../scripts/sortrunnew5.sh {input.x1} {input.x2} {output}"
+       "bash ../scripts/sortrunnew5.sh {input.x1} {input.x2}  {output}"
 rule sortrunnew55:
     input:
-       x1 = "../gccoords/def/gccoords_{number}_undefhg19_40_all_loop7.bed",
-       x2 = "/data/nooroka/grant/punkt3/sort_sort_sort3/sort_sort_sort_sort3/bed/un/{number}_2_sorted_un.bed"
+       x1 = "../gccoords/def/gccoords_{number}_undefhg19_40_all_loop7_control2.bed",
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab.bed"
     output:
-       "../mutcos40/mutcos_non_quadr_{number}_40_all_loop7_control2.bed"
+       "../mutcos40_v3/mutcos_non_quadr_{number}_40_all_loop7_control2_v3.bed"
     shell:
-       "bash ../scripts/sortrunnew55.sh {input.x1} {input.x2} {output}"
+       "bash ../scripts/sortrunnew55.sh {input.x1} {input.x2}  {output}"
 rule cosmut: 
     input:
        x1 = "/data/nooroka/grant/punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number}_40.bed",
-       x2 = "../mutcos40/mutcosquadr_{number}_40_all_loop7_control2.bed"
+       x2 = "../mutcos40_v3/mutcosquadr_{number}_40_all_loop7_control2_v3.bed"
     output:
-       "../mutdensgene_quadr40_2_{number}_all_loop7_control2.txt"
+       "../mutdensgene_quadr40_2_{number}_all_loop7_control2_v3.txt"
     shell:
        """
        python ../scripts/cosmut.py {input.x1} {input.x2} {output} {wildcards.number}
        """
 rule cosmut_non_quadr:
     input:
-       x1 = "../gccoords/def/gccoords_{number}_undefhg19_40_all_loop7.bed",
-       x2 = rules.sortrunnew55.output,
-       x3 = "../gccoords/control/gccoords_percents_{number}_my_40_subtract_from_all.txt"
+       x1 = "../gccoords/def/gccoords_{number}_undefhg19_40_all_loop7_control2.bed",
+       x2 =  "../mutcos40_v3/mutcos_non_quadr_{number}_40_all_loop7_control2_v3.bed",
+       x3 = "../gccoords/control/gccoords_percents_{number}_my_40_control2.txt"
     output:
-       "../mutdensgene_non_quadr40_2_{number}_all_loop7_control2.txt"
+       "../mutdensgene_non_quadr40_2_{number}_all_loop7_control2_v3.txt"
     shell:
        """
        python ../scripts/cosmut_non_quadr.py {input.x3} {input.x1} {input.x2} {output} {wildcards.number}
        """
 rule cat:
      input:
-        x1 = expand("../mutdensgene_quadr40_2_{number}_all_loop7_control2.txt", number = SAMPLES),
-        x2 = expand("../mutdensgene_non_quadr40_2_{number}_all_loop7_control2.txt",number = SAMPLES)
+        x1 = expand("../mutdensgene_quadr40_2_{number}_all_loop7_control2_v3.txt", number = SAMPLES),
+        x2 = expand("../mutdensgene_non_quadr40_2_{number}_all_loop7_control2_v3.txt",number = SAMPLES)
      output:
-        y1 = "../mutdensgene_quadr40_2-from_all_loop7_control2.txt",
-        y2 = "../mutdensgene_non_quadr40_2-from_all_loop7_control2.txt"
+        y1 = "../mutdensgene_40_v3/mutdensgene_quadr40_2-from_all_loop7_control2_v3.txt",
+        y2 = "../mutdensgene_40_v3/mutdensgene_non_quadr40_2-from_all_loop7_control2_v3.txt"
      shell:
         """
         cat {input.x1} > {output.y1}

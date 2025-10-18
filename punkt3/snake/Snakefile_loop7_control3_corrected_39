@@ -1,0 +1,22 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        "../densities/densitiesGSM39_percent-270125_subtract_from_all_loop7_control3.txt"
+rule script2:
+     input:
+        "/data/nooroka/grant/punkt3/stage2/gccoords/quadr2/{number3}_39_control3_cleaned.bed",
+        "../gccoords/filtered/max_all_39_{number3}_control3.txt"
+     output:
+        "../densities/densitiesGSM39_percent{number3}-270125_subtract_from_all_loop7_control3.txt"
+     shell:
+         """
+         python ../scripts/script2_39_all_control3.py {input} {wildcards.number3} {output}
+         """
+rule cat2:
+     input:
+        expand("../densities/densitiesGSM39_percent{number3}-270125_subtract_from_all_loop7_control3.txt",number3 = SAMPLES)
+     output:
+        "../densities/densitiesGSM39_percent-270125_subtract_from_all_loop7_control3.txt"
+     shell:
+        "cat {input} > {output}"

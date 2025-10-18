@@ -2,12 +2,12 @@ SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16
 
 rule all:
      input:
-        expand("/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_subtract_from_all.fasta",number3 = SAMPLES),
+        expand("/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_control2_39.fasta",number3 = SAMPLES),
         expand("../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_39.bed",number3 = SAMPLES),
-        expand("../meanquadr/meanquadrhg19{number3}_my_39_subtract_from_all.txt", number3 = SAMPLES),
-        expand("../results/results_hg19_percents_{number3}_my_39_subtract_from_all.txt",number3 = SAMPLES),
-        expand("../gccoords/control/gccoords_percents_{number3}_my_39_subtract_from_all.txt",number3 = SAMPLES),
-        expand("../densities/densitiesGSM39_percent-1809_subtract_from_all.txt")
+        expand("../meanquadr/meanquadrhg19{number3}_my_39_control2.txt", number3 = SAMPLES),
+        expand("../results/results_hg19_percents_{number3}_my_39_control2.txt",number3 = SAMPLES),
+        expand("../gccoords/control/gccoords_percents_{number3}_my_39_control2.txt",number3 = SAMPLES),
+        expand("../densities3_final/densitiesGSM39_percent-1209_control2.txt")
                                                                                         
 
 rule script4:
@@ -15,7 +15,7 @@ rule script4:
        "../../../punkt1/control/bed/control_set_{number3}_39_my.bed",
        "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_39.bed"
     output:
-       "/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_subtract_from_all.fasta",
+       "/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_control2_39.fasta",
     shell:
        """
        bash ../scripts/script4.sh {input} {output}
@@ -24,7 +24,7 @@ rule mean:
     input:
       "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_39.bed"
     output:
-      "../meanquadr/meanquadrhg19{number3}_my_39_subtract_from_all.txt"
+      "../meanquadr/meanquadrhg19{number3}_my_39_control2.txt"
     shell:
       """
       python ../scripts/mean.py {input} {output}
@@ -32,14 +32,14 @@ rule mean:
 
 rule cat:
      input:
-       x1 = expand("../meanquadr/meanquadrhg19{number3}_my_39_subtract_from_all.txt", number3 = SAMPLES),
-       x2 = "/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_subtract_from_all.fasta",
+       x1 = expand("../meanquadr/meanquadrhg19{number3}_my_39_control2.txt", number3 = SAMPLES),
+       x2 = "/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_control2_39.fasta",
      output:
-       "../results/results_hg19_percents_{number3}_my_39_subtract_from_all.txt"
+       "../results/results_hg19_percents_{number3}_my_39_control2.txt"
      shell:
        """
-       cat {input.x1} > ../meanquadr/meanquadrhg19_my_39_subtract_from_all.txt
-       python ../scripts/windowrun13.py ../meanquadr/meanquadrhg19_my_39_subtract_from_all.txt {input.x2}  {output} {wildcards.number3}
+       cat {input.x1} > ../meanquadr/meanquadrhg19_my_39_control2.txt
+       python ../scripts/windowrun13.py ../meanquadr/meanquadrhg19_my_39_control2.txt {input.x2}  {output} {wildcards.number3}
        """ 
 
 
@@ -47,7 +47,7 @@ rule coordsgc:
      input:
         rules.cat.output
      output:
-        "../gccoords/control/gccoords_percents_{number3}_my_39_subtract_from_all.txt"
+        "../gccoords/control/gccoords_percents_{number3}_my_39_control2.txt"
      shell:
         """
         python ../scripts/coordsgc13.py {input} {output}
@@ -58,16 +58,16 @@ rule script2:
         "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_39.bed",
         rules.coordsgc.output
      output:
-        "../densities/densitiesGSM39_percent{number3}-1809_subtract_from_all.txt"
+        "../densities3/densitiesGSM39_percent{number3}-1209_control2.txt"
      shell:
          """
          python ../scripts/script2_39_all.py {input} {wildcards.number3} {output}
          """
 rule cat2:
      input:
-        expand("../densities/densitiesGSM39_percent{number3}-1809_subtract_from_all.txt",number3 = SAMPLES)
+        expand("../densities3/densitiesGSM39_percent{number3}-1209_control2.txt",number3 = SAMPLES)
      output:
-        "../densities/densitiesGSM39_percent-1809_subtract_from_all.txt"
+        "../densities3_final/densitiesGSM39_percent-1209_control2.txt"
      shell:
         "cat {input} > {output}"
 

@@ -1,0 +1,22 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        "../densities3_final/densitiesGSM40_percent-1209_snp_control3_plus.txt"
+rule script2:
+     input:
+        "../../../punkt1/stage2/merged/quadr7_chain180424_plus2_sorted_{number3}_40.bed",
+        "../gccoords/filtered/max_all_40_{number3}_control3_plus.txt"
+     output:
+        "../densities3/densitiesGSM40_percent{number3}-1209_snp_control3_plus.txt"
+     shell:
+         """
+         python ../scripts/script2_40_snp_control3_plus.py {input} {wildcards.number3} {output}
+         """
+rule cat2:
+     input:
+        expand("../densities3/densitiesGSM40_percent{number3}-1209_snp_control3_plus.txt",number3 = SAMPLES)
+     output:
+        "../densities3_final/densitiesGSM40_percent-1209_snp_control3_plus.txt"
+     shell:
+        "cat {input} > {output}"
