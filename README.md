@@ -1,2 +1,3 @@
 The project is dedicated to calculating the density in G-quadruplex and interquadruplex regions. <br>
-In "punkt1" there are quadruplex-making scripts (python scripts and Snakemake), in "punkt3" we calculate control regions and then compare mutational density. <br>
+In "Peaks" folder  there  peaks-extracting are quadruplex-making scripts (python scripts and Snakemake), in "Density" folder we calculate control regions and then compare mutational density. <br>
+Mutations are from COSMIC and dbSNP, they are calculated for plus and minus strands. 
