@@ -7,7 +7,7 @@ rule all:
 
 rule count1:
      input:
-         "../../GSM3003540/GSM3003540_quadr_7_6_minus.bed"
+         "../../GSM3003540/GSM3003540_quadr_7_6_2_minus_filtered2.bed"
      output: 
          "../quadr7_chain180424_40_minus.bed"
      shell:
