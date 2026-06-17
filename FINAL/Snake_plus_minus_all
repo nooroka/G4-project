@@ -1,0 +1,87 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+VERSIONS = ["39", "40"]
+STRANDS  = ["minus", "plus"]
+
+COSMIC_DIR = "/mnt/work/nooroka/punkt2/COSMIC_102"
+
+rule all:
+    input:
+        expand(
+            "final_cosmic/{version}/mutdensgene_quadr{version}_2-from_all_loop7_control2_no_gc_v13-3_{strand}.txt",
+            version=VERSIONS, strand=STRANDS
+        ),
+        expand(
+            "final_cosmic/{version}/mutdensgene_non_quadr{version}_2-from_all_loop7_control2_no_gc_v13-3_{strand}.txt",
+            version=VERSIONS, strand=STRANDS
+        ),
+        expand(
+            "../mutdensgene_{version}_v13/mutdensgene_quadr{version}_2_{number}_all_loop7_control2_no_gc_v13-3_{strand}.txt",
+            version=VERSIONS, strand=STRANDS, number=SAMPLES
+        ),
+        expand(
+            "../mutdensgene_{version}_v13/mutdensgene_non_quadr{version}_2_{number}_all_loop7_control2_no_gc_v13-3_{strand}.txt",
+            version=VERSIONS, strand=STRANDS, number=SAMPLES
+        ),
+        expand(
+            "final_cosmic/{version}/out_control2_no_gc_{version}_quadr_{strand}.csv",
+            version=VERSIONS, strand=STRANDS
+        ),
+        expand(
+            "final_cosmic/{version}/out_control2_no_gc_{version}_non-quadr_{strand}.csv",
+            version=VERSIONS, strand=STRANDS
+        )
+
+
+rule sortrunnew5:
+    input:
+        x1 = "/data/nooroka/grant/punkt1/stage2/merged/quadr7_chain180424_{strand}2_sorted_{number}_{version}.bed",
+        x2 = COSMIC_DIR + "/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
+    output:
+        "../mutdensgene_{version}_v13/mutdensgene_quadr{version}_2_{number}_all_loop7_control2_no_gc_v13-3_{strand}.txt"
+    shell:
+        "bash ../scripts/sortrunnew5-3-3.sh {input.x1} {input.x2} {output}"
+
+
+rule sortrunnew55:
+    input:
+        x1 = "../gccoords/def/gccoords_{number}2defhg19_{version}_all_loop7_control2_no_gc_{strand}_corrected2.bed.gz",
+        x2 = COSMIC_DIR + "/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
+    output:
+        "../mutdensgene_{version}_v13/mutdensgene_non_quadr{version}_2_{number}_all_loop7_control2_no_gc_v13-3_{strand}.txt"
+    shell:
+        "bash ../scripts/sortrunnew55-3-3.sh <(zcat {input.x1}) {input.x2} {output}"
+
+
+rule cat:
+    input:
+        x1 = expand(
+            "../mutdensgene_{{version}}_v13/mutdensgene_quadr{{version}}_2_{number}_all_loop7_control2_no_gc_v13-3_{{strand}}.txt",
+            number=SAMPLES
+        ),
+        x2 = expand(
+            "../mutdensgene_{{version}}_v13/mutdensgene_non_quadr{{version}}_2_{number}_all_loop7_control2_no_gc_v13-3_{{strand}}.txt",
+            number=SAMPLES
+        )
+    output:
+        y1 = "final_cosmic/{version}/mutdensgene_quadr{version}_2-from_all_loop7_control2_no_gc_v13-3_{strand}.txt",
+        y2 = "final_cosmic/{version}/mutdensgene_non_quadr{version}_2-from_all_loop7_control2_no_gc_v13-3_{strand}.txt"
+    shell:
+        """
+        cat {input.x1} > {output.y1}
+        cat {input.x2} > {output.y2}
+        """
+
+
+rule density:
+    input:
+        x1 = "final_cosmic/{version}/mutdensgene_quadr{version}_2-from_all_loop7_control2_no_gc_v13-3_{strand}.txt",
+        x2 = "final_cosmic/{version}/mutdensgene_non_quadr{version}_2-from_all_loop7_control2_no_gc_v13-3_{strand}.txt"
+    output:
+        y1 = "final_cosmic/{version}/out_control2_no_gc_{version}_quadr_{strand}.csv",
+        y2 = "final_cosmic/{version}/out_control2_no_gc_{version}_non-quadr_{strand}.csv"
+    shell:
+        """
+        python ../scripts/density_per_ch_chunks.py {input.x1} {output.y1}
+        python ../scripts/density_per_ch_chunks.py {input.x2} {output.y2}
+        """
