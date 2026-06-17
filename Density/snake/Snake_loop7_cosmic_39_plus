@@ -2,57 +2,59 @@ SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16
 
 rule all:
      input:
-        expand("../mutcos39_v3/mutcosquadr_{number}_39_all_loop7_control2_v3_plus.bed",number = SAMPLES),
-        "../mutdensgene_39_v3/final/mutdensgene_quadr39_2-from_all_loop7_control2_v3_plus.txt",
-        "../mutdensgene_39_v3/final/mutdensgene_non_quadr39_2-from_all_loop7_control2_v3_plus.txt",
-        expand("../mutcos39_v3/mutcos_non_quadr_{number}_39_all_loop7_control2_v3_plus.bed", number = SAMPLES),
+        expand("../mutcos39_v10/mutcosquadr_{number}_39_all_loop7_control2_plus_v10.bed",number = SAMPLES),
+        "../mutdensgene_39_v10/final/mutdensgene_quadr39_2-from_all_loop7_control2_plus_v10.txt",
+        "../mutdensgene_39_v10/final/mutdensgene_non_quadr39_2-from_all_loop7_control2_plus_v10.txt",
+        expand("../mutcos39_v10/mutcos_non_quadr_{number}_39_all_loop7_control2_plus_v10.bed", number = SAMPLES),
         
                                                                                        
 
 rule sortrunnew5:
     input:
        x1 = "/data/nooroka/grant/punkt1/stage2/merged/quadr7_chain180424_plus2_sorted_{number}_39.bed",
-       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab.bed"
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
     output:
-       "../mutcos39_v3/mutcosquadr_{number}_39_all_loop7_control2_v3_plus.bed"
+       "../mutcos39_v10/mutcosquadr_{number}_39_all_loop7_control2_plus_v10.bed"
     shell:
        "bash ../scripts/sortrunnew5.sh {input.x1} {input.x2}  {output}"
 rule sortrunnew55:
     input:
-       x1 = "../gccoords/def/gccoords_{number}_undefhg19_39_all_loop7_control2_plus.bed",
-       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab.bed"
+       x1 = "../gccoords/def/gccoords_{number}2defhg19_39_all_loop7_control2_plus.bed.gz",
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
     output:
-       "../mutcos39_v3/mutcos_non_quadr_{number}_39_all_loop7_control2_v3_plus.bed"
+       "../mutcos39_v10/mutcos_non_quadr_{number}_39_all_loop7_control2_plus_v10.bed"
     shell:
-       "bash ../scripts/sortrunnew55.sh {input.x1} {input.x2}  {output}"
+       """
+       bash ../scripts/sortrunnew55.sh <(zcat {input.x1}) {input.x2} {output}
+       """
 rule cosmut: 
     input:
        x1 = "/data/nooroka/grant/punkt1/stage2/merged/quadr7_chain180424_plus2_sorted_{number}_39.bed",
-       x2 = "../mutcos39_v3/mutcosquadr_{number}_39_all_loop7_control2_v3_plus.bed"
+       x2 = "../mutcos39_v10/mutcosquadr_{number}_39_all_loop7_control2_plus_v10.bed"
     output:
-       "../mutdensgene_39_v3/mutdensgene_quadr39_2_{number}_all_loop7_control2_v3_plus.txt"
+       "../mutdensgene_39_v10/mutdensgene_quadr39_2_{number}_all_loop7_control2_plus_v10.txt"
     shell:
        """
        python ../scripts/cosmut.py {input.x1} {input.x2} {output} {wildcards.number}
        """
 rule cosmut_non_quadr:
     input:
-       x1 = "../gccoords/def/gccoords_{number}_undefhg19_39_all_loop7_control2_plus.bed",
-       x2 =  "../mutcos39_v3/mutcos_non_quadr_{number}_39_all_loop7_control2_v3_plus.bed",
-       x3 = "../gccoords/control/gccoords_percents_{number}_my_40_subtract_from_control2_plus.txt"
+       x1 = "../gccoords/def/gccoords_{number}2defhg19_39_all_loop7_control2_plus.bed.gz",
+       x2 = "../mutcos39_v10/mutcos_non_quadr_{number}_39_all_loop7_control2_plus_v10.bed",
+       x3 = "../gccoords/control/gccoords_percents_{number}_my_39_control2_plus.txt.gz"
     output:
-       "../mutdensgene_39_v3/mutdensgene_non_quadr39_2_{number}_all_loop7_control2_v3_plus.txt"
+       "../mutdensgene_39_v10/mutdensgene_non_quadr39_2_{number}_all_loop7_control2_plus_v10.txt"
     shell:
        """
-       python ../scripts/cosmut_non_quadr.py {input.x3} {input.x1} {input.x2} {output} {wildcards.number}
+       python ../scripts/cosmut_non_quadr.py <(zcat {input.x3}) <(zcat {input.x1}) {input.x2} {output} {wildcards.number}
        """
 rule cat:
      input:
-        x1 = expand("../mutdensgene_39_v3/mutdensgene_quadr39_2_{number}_all_loop7_control2_v3_plus.txt", number = SAMPLES),
-        x2 = expand("../mutdensgene_39_v3/mutdensgene_non_quadr39_2_{number}_all_loop7_control2_v3_plus.txt",number = SAMPLES)
+        x1 = expand("../mutdensgene_39_v10/mutdensgene_quadr39_2_{number}_all_loop7_control2_plus_v10.txt", number = SAMPLES),
+        x2 = expand("../mutdensgene_39_v10/mutdensgene_non_quadr39_2_{number}_all_loop7_control2_plus_v10.txt",number = SAMPLES)
      output:
-        y1 = "../mutdensgene_39_v3/final/mutdensgene_quadr39_2-from_all_loop7_control2_v3_plus.txt",
-        y2 = "../mutdensgene_39_v3/final/mutdensgene_non_quadr39_2-from_all_loop7_control2_v3_plus.txt"
+        y1 = "../mutdensgene_39_v10/final/mutdensgene_quadr39_2-from_all_loop7_control2_plus_v10.txt",
+        y2 = "../mutdensgene_39_v10/final/mutdensgene_non_quadr39_2-from_all_loop7_control2_plus_v10.txt"
      shell:
         """
         cat {input.x1} > {output.y1}

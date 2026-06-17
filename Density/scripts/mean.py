@@ -23,6 +23,8 @@ sysa = sys.argv[1].split("_")
 #sysb = sysa[-1].split(".")
 sysb = sysa[-2]
 #sysb = sysa[-3]
+#sysb = sysa[-4]
+#sysb = sysa[-6]
 w.write("chr" +str(str(sysb))+"\t"+str(del1)+"\n")
 #w.write("chr" +str(str(sysb[0]))+"\t"+str(del1)+"\n")
 w.close()

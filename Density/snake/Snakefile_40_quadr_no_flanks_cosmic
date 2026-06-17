@@ -1,0 +1,38 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        expand("../mutcos40_v10/mutcosquadr_{number}_40_no_flanks_all_loop7.bed",number = SAMPLES),
+        "../mutdensgene_40_v10/final/mutdensgene_quadr40_no_flanks_2-from_all_loop7.txt"
+       
+                                                                                       
+
+rule sortrunnew5:
+    input:
+       x1 = "../../../punkt1/stage2/merged_no_flanks/quadr7_chain180424_merged2_sorted_{number}_40_no_flanks.bed",
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
+    output:
+       "../mutcos40_v10/mutcosquadr_{number}_40_no_flanks_all_loop7.bed"
+    shell:
+       "bash ../scripts/sortrunnew5.sh {input.x1} {input.x2} {output}"
+rule cosmut: 
+    input:
+       x1 = "../../../punkt1/stage2/merged_no_flanks/quadr7_chain180424_merged2_sorted_{number}_40_no_flanks.bed",
+       x2 = "../mutcos40_v10/mutcosquadr_{number}_40_no_flanks_all_loop7.bed"
+    output:
+       "../mutdensgene_40_v10/mutdensgene_quadr40_no_flanks_2_{number}_all_loop7.txt"
+    shell:
+       """
+       python ../scripts/cosmut.py {input.x1} {input.x2} {output} {wildcards.number}
+       """
+rule cat:
+    input:
+        x1 = expand("../mutdensgene_40_v10/mutdensgene_quadr40_no_flanks_2_{number}_all_loop7.txt", number = SAMPLES),
+    output:
+        y1 = "../mutdensgene_40_v10/final/mutdensgene_quadr40_no_flanks_2-from_all_loop7.txt",
+    shell:
+        """
+        cat {input.x1} > {output.y1}
+        """
+
+

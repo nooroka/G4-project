@@ -1,0 +1,38 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        "../mutdensgene_39_v10/final/mutdensgene_non_quadr39_2-from_all_loop7_genome_v10.txt",
+        expand("../mutcos39_v10/mutcos_non_quadr_{number}_39_all_loop7_genome_v10.bed", number = SAMPLES),
+        
+                                                                                       
+rule sortrunnew55:
+    input:
+       x1 = "../gccoords/def/gccoords_{number}_undefhg19_genome_control.bed.gz",
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
+    output:
+       "../mutcos39_v10/mutcos_non_quadr_{number}_39_all_loop7_genome_v10.bed"
+    shell:
+       "bash ../scripts/sortrunnew55.sh <(zcat {input.x1}) {input.x2}  {output}"
+rule cosmut_non_quadr:
+    input:
+       x1 = "../gccoords/def/gccoords_{number}_undefhg19_genome_control.bed.gz",
+       x2 = "../mutcos39_v10/mutcos_non_quadr_{number}_39_all_loop7_genome_v10.bed",
+       x3 = "../gccoords/control/gccoords_percents_{number}_genome.txt"
+    output:
+       "../mutdensgene_39_v10/mutdensgene_non_quadr39_2_{number}_all_loop7_genome_v10.txt"
+    shell:
+       """
+       python ../scripts/cosmut_non_quadr.py {input.x3} <(zcat {input.x1}) {input.x2} {output} {wildcards.number}
+       """
+rule cat:
+     input:
+        x2 = expand("../mutdensgene_39_v10/mutdensgene_non_quadr39_2_{number}_all_loop7_genome_v10.txt",number = SAMPLES)
+     output:
+        g2 = "../mutdensgene_39_v10/final/mutdensgene_non_quadr39_2-from_all_loop7_genome_v10.txt"
+     shell:
+        """
+        cat {input.x2} > {output.y2}
+        """
+
+

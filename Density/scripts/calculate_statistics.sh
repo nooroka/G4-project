@@ -1,11 +1,12 @@
 #!/bin/bash
 
-TEMP_DIR="temp_files" 
+TEMP_DIR="temp_files"  # Должна соответствовать директории из первого скрипта
 OUTPUT="dbsnp_density_per_chrom_39.txt"
 
 echo -e "Chromosome\tQuadLength(bp)\tSNP_count\tDensity(SNP/kb)" > "$OUTPUT"
 
 for CHR in {1..22} X Y; do
+    # Проверяем существование необходимых файлов
     if [ ! -f "${TEMP_DIR}/overlap_chr${CHR}.bed" ] || [ ! -f "${TEMP_DIR}/quad_sorted_chr${CHR}.bed" ]; then
         continue
     fi

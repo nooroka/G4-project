@@ -1,0 +1,33 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+VERSIONS = ["39", "40"]
+
+rule all:
+     input:
+        expand("../mutdensgene_{version}_v11/final/mutdensgene_quadr{version}_2-from_all_loop7_genes_no_rnapIII_v11-3.txt", version=VERSIONS),
+        expand("../mutdensgene_{version}_v11/mutdensgene_quadr{version}_2_{number}_all_loop7_genes_no_rnapIII_v11-3.txt", number=SAMPLES, version=VERSIONS),
+        expand("../mutdensgene_{version}_v11/final/out_genes_no_rnapIII_{version}_quadr.csv", version=VERSIONS)
+
+rule sortrunnew5:
+    input:
+       x1 = "../../../punkt1/no_rnapIII_{version}/chr{number}.bed",
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
+    output:
+       "../mutdensgene_{version}_v11/mutdensgene_quadr{version}_2_{number}_all_loop7_genes_no_rnapIII_v11-3.txt"
+    shell:
+       "bash ../scripts/sortrunnew5-3-3.sh {input.x1} {input.x2} {output}"
+
+rule cat:
+     input:
+        x1 = expand("../mutdensgene_{{version}}_v11/mutdensgene_quadr{{version}}_2_{number}_all_loop7_genes_no_rnapIII_v11-3.txt", number=SAMPLES)
+     output:
+        y1 = "../mutdensgene_{version}_v11/final/mutdensgene_quadr{version}_2-from_all_loop7_genes_no_rnapIII_v11-3.txt"
+     shell:
+        "cat {input.x1} > {output.y1}"
+
+rule density:
+      input:
+        x1 = "../mutdensgene_{version}_v11/final/mutdensgene_quadr{version}_2-from_all_loop7_genes_no_rnapIII_v11-3.txt"
+      output:
+        y1 = "../mutdensgene_{version}_v11/final/out_genes_no_rnapIII_{version}_quadr.csv"
+      shell:
+        "python ../scripts/density_per_ch.py {input.x1} {output.y1}"

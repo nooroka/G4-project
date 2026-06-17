@@ -1,0 +1,33 @@
+configfile: "config.yaml"
+
+# Определяем список всех хромосом
+chromosomes = [str(c) for c in range(1, 23)] + ['X', 'Y']
+
+rule all:
+    input:
+        expand("temp/dbsnp_chr{chrom}.bed", chrom=chromosomes),
+        expand("temp/quadr_chr{chrom}.bed",chrom=chromosomes)
+
+rule prepare_quad_files:
+    input:
+        quad_bed = config["quad_bed"]
+    output:
+        "temp/quadr_chr{chrom}.bed"
+    params:
+        chrom = "{chrom}"
+    shell:
+        """
+        awk -v chr="chr{wildcards.chrom}" '$1 == chr' {input.quad_bed} > {output}
+        """
+
+rule prepare_dbsnp_files:
+    input:
+        dbsnp = config["dbsnp_dir"] + "/chr{chrom}.vcf.gz"
+    output:
+        "temp/dbsnp_chr{chrom}.bed"
+    params:
+        chrom = "{chrom}"
+    shell:
+        """
+        zcat {input.dbsnp} | awk -v chr="chr{wildcards.chrom}" '!/^#/ {{print chr"\\t"$2-1"\\t"$2}}' > {output}
+        """

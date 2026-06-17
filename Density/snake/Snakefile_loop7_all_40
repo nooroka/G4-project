@@ -7,7 +7,7 @@ rule all:
         expand("../meanquadr/meanquadrhg19{number3}_my_40_control2.txt", number3 = SAMPLES),
         expand("../results/results_hg19_percents_{number3}_my_40_control2.txt",number3 = SAMPLES),
         expand("../gccoords/control/gccoords_percents_{number3}_my_40_control2.txt",number3 = SAMPLES),
-        expand("../densities3_final/densitiesGSM40_percent-1209_control2.txt")
+        expand("../densities5_final/densitiesGSM40_percent-1209_control2.txt")
                                                                                         
 
 rule script4:
@@ -58,16 +58,16 @@ rule script2:
         "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_40.bed",
         rules.coordsgc.output
      output:
-        "../densities3/densitiesGSM40_percent{number3}-1209_control2.txt"
+        "../densities5/densitiesGSM40_percent{number3}-1209_control2.txt"
      shell:
          """
          python ../scripts/script2_40_all.py {input} {wildcards.number3} {output}
          """
 rule cat2:
      input:
-        expand("../densities3/densitiesGSM40_percent{number3}-1209_control2.txt",number3 = SAMPLES)
+        expand("../densities5/densitiesGSM40_percent{number3}-1209_control2.txt",number3 = SAMPLES)
      output:
-        "../densities3_final/densitiesGSM40_percent-1209_control2.txt"
+        "../densities5_final/densitiesGSM40_percent-1209_control2.txt"
      shell:
         "cat {input} > {output}"
 

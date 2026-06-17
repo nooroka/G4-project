@@ -2,35 +2,35 @@ SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16
 
 rule all:
      input:
-        expand("../mutcos39_corrected_v3/mutcosquadr_{number}_39_all_loop7_control2_corrected_plus.bed",number = SAMPLES),
-        "../mutdensgene_39_v3/final/mutdensgene_quadr39_2-from_all_loop7_control2_corrected_plus.txt",
-        "../mutdensgene_39_v3/final/mutdensgene_non_quadr39_2-from_all_loop7_control2_corrected_plus.txt",
-        expand("../mutcos39_corrected_v3/mutcos_non_quadr_{number}_39_all_loop7_control2_corrected_plus.bed", number = SAMPLES),
+        expand("../mutcos39_corrected_v8/mutcosquadr_{number}_39_all_loop7_control2_corrected_plus.bed",number = SAMPLES),
+        "../mutdensgene_39_v8/final/mutdensgene_quadr39_2-from_all_loop7_control2_corrected_plus.txt",
+        "../mutdensgene_39_v8/final/mutdensgene_non_quadr39_2-from_all_loop7_control2_corrected_plus.txt",
+        expand("../mutcos39_corrected_v8/mutcos_non_quadr_{number}_39_all_loop7_control2_corrected_plus.bed", number = SAMPLES),
         
                                                                                        
 
 rule sortrunnew5:
     input:
        x1 = "/data/nooroka/grant/punkt3/stage2/gccoords/quadr2/{number}_39_control3_cleaned_plus.bed",
-       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab.bed"
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
     output:
-       "../mutcos39_corrected_v3/mutcosquadr_{number}_39_all_loop7_control2_corrected_plus.bed"
+       "../mutcos39_corrected_v8/mutcosquadr_{number}_39_all_loop7_control2_corrected_plus.bed"
     shell:
        "bash ../scripts/sortrunnew5.sh {input.x1} {input.x2} {output}"
 rule sortrunnew55:
     input:
        x1 = "../gccoords/def/gccoords_{number}_undefhg19_39_all_loop7_control2_cleaned_plus.bed",
-       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab.bed"
+       x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
     output:
-       "../mutcos39_corrected_v3/mutcos_non_quadr_{number}_39_all_loop7_control2_corrected_plus.bed"
+       "../mutcos39_corrected_v8/mutcos_non_quadr_{number}_39_all_loop7_control2_corrected_plus.bed"
     shell:
        "bash ../scripts/sortrunnew55.sh {input.x1} {input.x2} {output}"
 rule cosmut: 
     input:
        x1 = "/data/nooroka/grant/punkt3/stage2/gccoords/quadr2/{number}_39_control3_cleaned_plus.bed",
-       x2 = "../mutcos39_corrected_v3/mutcosquadr_{number}_39_all_loop7_control2_corrected_plus.bed"
+       x2 = "../mutcos39_corrected_v8/mutcosquadr_{number}_39_all_loop7_control2_corrected_plus.bed"
     output:
-       "../mutdensgene_39_v3/mutdensgene_quadr39_2_{number}_all_loop7_control2_corrected_plus.txt"
+       "../mutdensgene_39_v8/mutdensgene_quadr39_2_{number}_all_loop7_control2_corrected_plus.txt"
     shell:
        """
        python ../scripts/cosmut.py {input.x1} {input.x2} {output} {wildcards.number}
@@ -41,18 +41,18 @@ rule cosmut_non_quadr:
        x2 = rules.sortrunnew55.output,
        x3 = "../gccoords/control/gccoords_percents_{number}_my_39_all_control2_cleaned_plus.txt"
     output:
-       "../mutdensgene_39_v3/mutdensgene_non_quadr39_2_{number}_all_loop7_control2_corrected_plus.txt"
+       "../mutdensgene_39_v8/mutdensgene_non_quadr39_2_{number}_all_loop7_control2_corrected_plus.txt"
     shell:
        """
        python ../scripts/cosmut_non_quadr.py {input.x3} {input.x1} {input.x2} {output} {wildcards.number}
        """
 rule cat:
      input:
-        x1 = expand("../mutdensgene_39_v3/mutdensgene_quadr39_2_{number}_all_loop7_control2_corrected_plus.txt", number = SAMPLES),
-        x2 = expand("../mutdensgene_39_v3/mutdensgene_non_quadr39_2_{number}_all_loop7_control2_corrected_plus.txt",number = SAMPLES)
+        x1 = expand("../mutdensgene_39_v8/mutdensgene_quadr39_2_{number}_all_loop7_control2_corrected_plus.txt", number = SAMPLES),
+        x2 = expand("../mutdensgene_39_v8/mutdensgene_non_quadr39_2_{number}_all_loop7_control2_corrected_plus.txt",number = SAMPLES)
      output:
-        y1 = "../mutdensgene_39_v3/final/mutdensgene_quadr39_2-from_all_loop7_control2_corrected_plus.txt",
-        y2 = "../mutdensgene_39_v3/final/mutdensgene_non_quadr39_2-from_all_loop7_control2_corrected_plus.txt"
+        y1 = "../mutdensgene_39_v8/final/mutdensgene_quadr39_2-from_all_loop7_control2_corrected_plus.txt",
+        y2 = "../mutdensgene_39_v8/final/mutdensgene_non_quadr39_2-from_all_loop7_control2_corrected_plus.txt"
      shell:
         """
         cat {input.x1} > {output.y1}

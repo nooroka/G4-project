@@ -1,0 +1,8 @@
+chr1	non G4 motif	average density	0.27527025639391395	average G4 motif/interval length	46
+chr1	G4 motif all	average density	0.3642642806626861	average G4 motif/interval length	46.447448190535106
+chr1	non G4 motif	average density	0.27527025639391395	average G4 motif/interval length	46
+chr1	G4 motif all	average density	0.3642642806626861	average G4 motif/interval length	46.447448190535106
+chr1	non G4 motif	average density	0.27527025639391395	average G4 motif/interval length	46
+chr1	G4 motif all	average density	0.3642642806626861	average G4 motif/interval length	46.447448190535106
+chr1	non G4 motif	average density	0.2751604896305817	average G4 motif/interval length	46
+chr1	G4 motif all	average density	0.3640578405296588	average G4 motif/interval length	46.447448190535106

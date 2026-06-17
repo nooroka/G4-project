@@ -7,7 +7,7 @@ rule all:
         expand("../meanquadr/meanquadrhg19{number3}_my_39_all_control1_plus.txt",number3 = SAMPLES),
         expand("../results/results_hg19_percents_{number3}_my_39_all_control1_plus.txt",number3 = SAMPLES),
         expand("../gccoords/control/gccoords_percents_{number3}_my_39_all_control1_plus.txt",number3 = SAMPLES),
-        expand("../densities3_final/densities2GSM39_percent-1209_all_control1_plus_2.txt")
+        expand("../densities5_final/densities2GSM39_percent-1209_all_control1_plus_3.txt")
                                                                                         
 rule script4:
     input:
@@ -57,16 +57,16 @@ rule script2:
         "../../../punkt1/stage2/merged/quadr7_chain180424_plus2_sorted_{number3}_39.bed",
         rules.coordsgc.output
      output:
-        "../densities3/densities2GSM39_percent{number3}-1209_all_control1_plus_2.txt"
+        "../densities5/densities2GSM39_percent{number3}-1209_all_control1_plus_3.txt"
      shell:
          """
          python ../scripts/script2_39_all_control1_plus.py {input} {wildcards.number3} {output}
          """
 rule cat2:
      input:
-        expand("../densities3/densities2GSM39_percent{number3}-1209_all_control1_plus_2.txt",number3 = SAMPLES)
+        expand("../densities5/densities2GSM39_percent{number3}-1209_all_control1_plus_3.txt",number3 = SAMPLES)
      output:
-        "../densities3_final/densities2GSM39_percent-1209_all_control1_plus_2.txt"
+        "../densities5_final/densities2GSM39_percent-1209_all_control1_plus_3.txt"
      shell:
         "cat {input} > {output}"
 

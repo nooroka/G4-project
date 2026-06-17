@@ -1,0 +1,28 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        expand("../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_40.bed",number3 = SAMPLES),
+        expand("../gccoords/control/gccoords_percents_{number3}_my_40_control2_no_gc.txt.gz",number3 = SAMPLES),
+        expand("../densities9_final/densitiesGSM40_percent-1209_control2_no_gc.txt")
+
+
+
+
+rule script2:
+     input:
+        x1 = "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_40.bed",
+        x2 = "../gccoords/control/gccoords_percents_{number3}_my_40_control2_no_gc.txt.gz"
+     output:
+        "../densities9/densitiesGSM40_percent{number3}-1209_control2_no_gc.txt"
+     shell:
+         """
+         python ../scripts/script2_40_all_no_gc_corrected2_2.py {input.x1} <(zcat {input.x2}) {wildcards.number3} {output}
+         """
+rule cat2:
+     input:
+        expand("../densities9/densitiesGSM40_percent{number3}-1209_control2_no_gc.txt",number3 = SAMPLES)
+     output:
+        "../densities9_final/densitiesGSM40_percent-1209_control2_no_gc.txt"
+     shell:
+        "cat {input} > {output}"

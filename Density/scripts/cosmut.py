@@ -13,9 +13,21 @@ for line in op:
         sum22=int(line[2])-int(line[1]) #interval length for the all genome, except genes
         sum1+=sum22
 op.close()  
-d1 = subprocess.check_output("wc -l {}".format(sys.argv[2]),shell = True) #число мутаций на длину квадруплекса
+#d1 = subprocess.check_output("wc -l {}".format(sys.argv[2]),shell = True) #число мутаций на длину квадруплекса
+def count_lines_fast(filepath):
+    """Быстрый подсчет строк (не загружает файл в память)"""
+    count = 0
+    with open(filepath, 'r') as f:
+        for line in f:
+            count += 1
+    return count
 #d1 = subprocess.check_output('wc -l mutcos40/mutcosquadr{}_40.bed'.format(i),shell = True)#number of mutations
-d11 = d1.decode().split()[0]
-w.write("chr{}".format(sys.argv[4])+"\t"+str(float(int(d11)/int(sum1)))+"\n")#  
+#d11 = d1.decode().split()[0]
+d1 = count_lines_fast(sys.argv[2])
+d11 = d1
+if sum1==0:
+    w.write("chr{}".format(sys.argv[4])+"\t"+"0"+"\n")
+else:
+    w.write("chr{}".format(sys.argv[4])+"\t"+str(float(int(d11)/int(sum1)))+"\n")#  
 #w.write("chr{}".format(i)+"\t"+str(float(int(d11)/int(sum1)))+"\n")#density calculation
-#w.close()
+#w.close(a)
