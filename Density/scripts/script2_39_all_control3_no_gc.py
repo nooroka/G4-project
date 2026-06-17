@@ -33,7 +33,7 @@ for line in op:
 w3.close()
 op.close()
 d5 = count_lines_fast(format(sys.argv[2]))
-os.system("uniq /data/nooroka/grant/punkt3/stage2/gccoords/def/gccoords_{}2defhg19_39_all_loop7_control3_no_gc.bed > /data/nooroka/grant/punkt3/stage2/gccoords/def/gccoords_{}_undefhg19_39_all_loop7_control3_no_gc.bed".format(sys.argv[3],sys.argv[3]))
+#os.system("uniq /data/nooroka/grant/punkt3/stage2/gccoords/def/gccoords_{}2defhg19_39_all_loop7_control3_no_gc.bed > /data/nooroka/grant/punkt3/stage2/gccoords/def/gccoords_{}_undefhg19_39_all_loop7_control3_no_gc.bed".format(sys.argv[3],sys.argv[3]))
 os.system("sort -k4,4 -s /data/nooroka/grant/punkt3/stage2/resultgene/resultgenehg19{}_39_all_loop7_control3_no_gc.bed | awk  '!seen[$4]++' > /data/nooroka/grant/punkt3/stage2/resultgene/resultgenehg19{}_un_39_all_loop7_control3_no_gc.bed".format(sys.argv[3],sys.argv[3])) #мб не надо, проверить схожесть файлов
 #os.system("""bedtools intersect  -a <(awk 'BEGIN{OFS="\t"} { if ($3 <= $2) $3=$2+1; print }' /data/nooroka/grant/punkt3/bed-37/bed_chr_{}_sorted.bed) -b /data/nooroka/grant/punkt3/stage2/gccoords/def/gccoords_{}_undefhg19_39_all_loop7_control3_no_gc.bed -wa -wb | awk  '!seen[$4]++' >/data/nooroka/grant/punkt3/stage2/intmut/intmuthg19{}_39_all_loop7_control3_no_gc.bed""".format(sys.argv[3],sys.argv[3],sys.argv[3])) 
 cmd = """bedtools intersect -a <(awk 'BEGIN{{OFS="\\t"}} {{ if ($3 <= $2) $3=$2+1; print }}' /data/nooroka/grant/punkt3/bed-37/bed_chr_{}_sorted.bed) -b /data/nooroka/grant/punkt3/stage2/gccoords/def/gccoords_{}_undefhg19_39_all_loop7_control3_no_gc.bed -wa -wb | awk '!seen[$4]++' > /data/nooroka/grant/punkt3/stage2/intmut/intmuthg19{}_39_all_loop7_control3_no_gc.bed""".format(

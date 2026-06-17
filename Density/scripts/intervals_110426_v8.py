@@ -19,8 +19,8 @@ def sum_interval_lengths(filepath):
 def count_unique_mutations(mut_file, bed_arg, chr_id):
     """Считает уникальные мутации (по col4), сохраняя их в файл."""
     base_dir = "/data/nooroka/grant/punkt3/stage2"
-    #out_dir = os.path.join(base_dir, label)          # ← разная папка по label
-    #os.makedirs(out_dir, exist_ok=True)
+ #   out_dir = os.path.join(base_dir, label)          # ← разная папка по label
+  #  os.makedirs(out_dir, exist_ok=True)
    # out_file = os.path.join(out_dir, f"{label}_chr{chr_id}.bed")   # ← разное имя файла
     cmd = (
         "bedtools intersect "
@@ -38,24 +38,24 @@ def count_unique_mutations(mut_file, bed_arg, chr_id):
     )
     return int(result.stdout.strip())
 
-b_pattern         = "../../../punkt1/no_rnapIII_{}/chr{}.bed"
-gccoords_pattern  = "../../../punkt1/no_rnapIII_{}_control/chr{}.bed"
+b_pattern         = "../../../punkt1/stage2/merged_merged_flanks/flanks_{}_{}.bed"
+gccoords_pattern  = "/data/nooroka/grant/punkt3/stage2/gccoords/def/gccoords_new_{}2defgenes_less_50_control_{}.bed.gz"
 mutations_pattern = "/data/nooroka/grant/punkt3/bed-37/bed_chr_{}_sorted.bed.gz"
 
 total_gccoords = total_b = total_mut_gc = total_mut_b = 0
-out_file = "results_density_{}_genes_no_rnapIII.tsv".format(sys.argv[1])
+out_file= "results_density_{}_genes_new_flanks.tsv".format(sys.argv[1])
 
 with open(out_file, "w") as w:
     w.write("chr\tgccoords_len\tb_len\tmut_on_gc\tmut_on_b\tdensity_control\tdensity_quadr\n")
     for i in range(1, 25):
-        gc_file  = gccoords_pattern.format(sys.argv[1],i)
+        gc_file  = gccoords_pattern.format(i,sys.argv[1])
         b_file   = b_pattern.format(sys.argv[1],i)
         mut_file = mutations_pattern.format(i)
 
         gc_len = sum_interval_lengths(gc_file)
         b_len  = sum_interval_lengths(b_file)
 
-        mut_gc = count_unique_mutations(mut_file, gc_file, i)  # ← gccoords
+        mut_gc = count_unique_mutations(mut_file, "<(zcat {})".format(gc_file), i)  # ← gccoords
         mut_b  = count_unique_mutations(mut_file, b_file, i)                           # ← квадруплексы
 
         dc = mut_gc / gc_len if gc_len else 0

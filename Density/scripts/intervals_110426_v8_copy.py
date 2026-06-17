@@ -38,25 +38,25 @@ def count_unique_mutations(mut_file, bed_arg, chr_id):
     )
     return int(result.stdout.strip())
 
-b_pattern         = "../../../punkt1/genes_minus/chr{}_genes_minus.bed.gz"
-gccoords_pattern  = "/data/nooroka/grant/punkt3/stage2/gccoords/def/gccoords_{}2defhg19_{}_all_loop7_control2_no_gc_minus_corrected2.bed.gz"
+b_pattern         = "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{}_{}.bed"
+gccoords_pattern  = "/data/nooroka/grant/punkt3/stage2/gccoords/def/gccoords_{}2defhg19_{}_all_loop7_control2.bed.gz"
 mutations_pattern = "/data/nooroka/grant/punkt3/bed-37/bed_chr_{}_sorted.bed.gz"
 
 total_gccoords = total_b = total_mut_gc = total_mut_b = 0
-out_file = "results_density_{}_genes_minus_no_gc.tsv".format(sys.argv[1])
+out_file= "results_density_{}_control2_with_gc.tsv".format(sys.argv[1])
 
 with open(out_file, "w") as w:
     w.write("chr\tgccoords_len\tb_len\tmut_on_gc\tmut_on_b\tdensity_control\tdensity_quadr\n")
     for i in range(1, 25):
         gc_file  = gccoords_pattern.format(i,sys.argv[1])
-        b_file   = b_pattern.format(i)
+        b_file   = b_pattern.format(i,sys.argv[1])
         mut_file = mutations_pattern.format(i)
 
         gc_len = sum_interval_lengths(gc_file)
         b_len  = sum_interval_lengths(b_file)
 
         mut_gc = count_unique_mutations(mut_file, "<(zcat {})".format(gc_file), i)  # ← gccoords
-        mut_b  = count_unique_mutations(mut_file, "<(zcat {})".format(b_file), i)                           # ← квадруплексы
+        mut_b  = count_unique_mutations(mut_file, b_file, i)                           # ← квадруплексы
 
         dc = mut_gc / gc_len if gc_len else 0
         dq = mut_b  / b_len  if b_len  else 0

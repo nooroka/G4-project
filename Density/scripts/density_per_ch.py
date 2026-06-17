@@ -23,9 +23,9 @@ df[length_col] = pd.to_numeric(df[length_col], errors='coerce').fillna(0)
 grouped = df.groupby(chrom_col).agg(total_count=(count_col,'sum'), total_length_bp=(length_col,'sum')).reset_index()
 grouped['density_per_kb'] = grouped.apply(
     lambda r: (r['total_count']*1000.0/r['total_length_bp']) if r['total_length_bp']>0 else 0.0, axis=1)
-total_count = grouped['total_count'].sum()
-total_length = grouped['total_length_bp'].sum()
-grouped['density_old'] = grouped['total_count']/grouped['total_length_bp']
+#total_count = grouped['total_count'].sum()
+#total_length = grouped['total_length_bp'].sum()
+#grouped['density_old'] = grouped['total_count']/grouped['total_length_bp']
 def chrom_key(ch):
     ch = str(ch).lstrip('chr')
     if ch.isdigit(): return int(ch)
