@@ -8,7 +8,7 @@ rule all:
 rule script2:
      input:
         "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_{version}.bed",
-        "../gccoords/filtered/max_all_{version}_{number3}_control3_no_gc.txt"
+        "../gccoords/filtered2/max_all_{version}_{number3}_control3_no_gc.txt"
      output:
         "../densities11/densities2GSM{version}_percent{number3}-1209_control3_2.txt"
      shell:
