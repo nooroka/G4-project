@@ -1,9 +1,6 @@
 SAMPLES  = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
 THRESH   = ["39","40"]
 GENETYPE = ["genes","nongenes"]
-
-# --- helper-функции: выбирают нужный префикс файла в зависимости от genetype ---
-
 def quadr_bed(wildcards):
     prefix = "coding" if wildcards.genetype == "genes" else "noncoding"
     return f"/data/nooroka/grant/punkt1/stage2/merged/{prefix}_quadruplexes_merged_sorted_{wildcards.number}_{wildcards.thresh}_2.bed"
