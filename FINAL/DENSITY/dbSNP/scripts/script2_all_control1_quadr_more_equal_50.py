@@ -4,10 +4,10 @@ import subprocess
 from collections import defaultdict
 import sys
 
-w = open(sys.argv[4], "a")
+output_file = open(sys.argv[4], "a")
+
 
 def count_lines_fast(filepath):
-    """Быстрый подсчет строк (не загружает файл в память)"""
     if filepath.endswith(".gz"):
         cmd = "zcat {} | wc -l".format(filepath)
         result = subprocess.run(
@@ -21,13 +21,8 @@ def count_lines_fast(filepath):
             count += 1
     return count
 
+
 def run_count(bed_a, bed_b_path):
-    """
-    bedtools intersect(-a bed_a фикс координат, -b bed_b_path)
-    | sort -k4,4 -u | wc -l
-    Возвращает число уникальных пересечений (по 4-й колонке).
-    Если bed_a в .gz — читаем через zcat перед awk (process substitution).
-    """
     a_src = "zcat {}".format(bed_a) if bed_a.endswith(".gz") else "cat {}".format(bed_a)
     cmd = (
         "bedtools intersect "
@@ -42,68 +37,66 @@ def run_count(bed_a, bed_b_path):
     )
     return int(result.stdout.strip())
 
+
 bed_chr = "/data/nooroka/grant/punkt3/bed-37/bed_chr_{}_sorted.bed.gz".format(sys.argv[3])
 
-# ── 1. Первый bedtools: мутации (argv1) × гены ───────────────────────────────
-count_intersections_mut = run_count(bed_chr, sys.argv[1])
+n_mutations_in_g4 = run_count(bed_chr, sys.argv[1])
 
-# ── 2. Читаем sys.argv[2], пишем gccoords (обычный .bed) ───────────────────
-op2 = open(sys.argv[1], "r")
-sum_gc = 0
-op = open(sys.argv[2], "r")
+g4_intervals_file = open(sys.argv[1], "r")
+sum_g4_length = 0
+control_file = open(sys.argv[2], "r")
 
 gccoords_path = (
     "/data/nooroka/grant/punkt3/stage2/gccoords/def/"
     "gccoords_{}2defhg19_{}_all_loop7_control1_50_more_equal.bed".format(sys.argv[3], sys.argv[5])
 )
 
-w3 = open(gccoords_path, "wt")
-a = ""
-sum1 = 0
-for line in op:
+gccoords_file = open(gccoords_path, "wt")
+avg_quadruplex_length = ""
+sum_control_length = 0
+for line in control_file:
     line = line.strip().split()
-    a = line[6]
-    line77 = int(line[7][1:-1])
-    line88 = line[8][:-1]
-    b = int(line88) - line77
-    sum1 += b
-    w3.write("chr{}\t{}\t{}\n".format(sys.argv[3], line77, line88))
-w3.close()
-op.close()
+    avg_quadruplex_length = line[6]
+    interval_start = int(line[7][1:-1])
+    interval_end = line[8][:-1]
+    interval_length = int(interval_end) - interval_start
+    sum_control_length += interval_length
+    gccoords_file.write("chr{}\t{}\t{}\n".format(sys.argv[3], interval_start, interval_end))
+gccoords_file.close()
+control_file.close()
 
-count_lines_gc = count_lines_fast(sys.argv[2])
+n_control_descriptor_lines = count_lines_fast(sys.argv[2])
 
-# ── 3. Второй bedtools: мутации × GC-координаты ─────────────────────────────
-count_intersections_gc = run_count(bed_chr, gccoords_path)
+n_mutations_in_control = run_count(bed_chr, gccoords_path)
 
-for line2 in op2:
-    line2 = line2.strip().split()
-    sum22 = int(line2[2]) - int(line2[1])
-    sum_gc += sum22
-op2.close()
+for line in g4_intervals_file:
+    line = line.strip().split()
+    g4_interval_length = int(line[2]) - int(line[1])
+    sum_g4_length += g4_interval_length
+g4_intervals_file.close()
 
-count_lines_mut = count_lines_fast(sys.argv[1])
+n_g4_intervals = count_lines_fast(sys.argv[1])
 
-if a == "":
-    a = 0
-if count_lines_gc == 0:
-    w.write(
+if avg_quadruplex_length == "":
+    avg_quadruplex_length = 0
+if n_control_descriptor_lines == 0:
+    output_file.write(
         "chr{}\tnon G4 motif\taverage density\t0"
-        "\taverage G4 motif/interval length\t{}\n".format(sys.argv[3], a)
+        "\taverage G4 motif/interval length\t{}\n".format(sys.argv[3], avg_quadruplex_length)
     )
 else:
-    w.write(
+    output_file.write(
         "chr{}\tnon G4 motif\taverage density\t{}"
         "\taverage G4 motif/interval length\t{}\n".format(
-            sys.argv[3], float(int(count_intersections_gc) / int(sum1)), a
+            sys.argv[3], float(n_mutations_in_control / sum_control_length), avg_quadruplex_length
         )
     )
-w.write(
+output_file.write(
     "chr{}\tG4 motif all\taverage density\t{}"
     "\taverage G4 motif/interval length\t{}\n".format(
         sys.argv[3],
-        float(int(count_intersections_mut) / int(sum_gc)),
-        float(int(sum_gc) / int(count_lines_mut)),
+        float(n_mutations_in_g4 / sum_g4_length),
+        float(sum_g4_length / n_g4_intervals),
     )
 )
-w.close()
+output_file.close()

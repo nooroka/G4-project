@@ -3,11 +3,10 @@ import subprocess
 from collections import defaultdict
 import sys
 
-w = open(sys.argv[3], "a")
+output_file = open(sys.argv[3], "a")
 
 
 def count_lines_fast(filepath):
-    """Быстрый подсчет строк (не загружает файл в память)"""
     count = 0
     with open(filepath, 'r') as f:
         for line in f:
@@ -16,11 +15,6 @@ def count_lines_fast(filepath):
 
 
 def run_count(bed_a_gz, bed_b_path):
-    """
-    bedtools intersect(-a zcat(bed_a_gz) фикс координат, -b bed_b_path)
-    | sort -k4,4 -u | wc -l
-    Возвращает число уникальных пересечений (по 4-й колонке).
-    """
     cmd = (
         "bedtools intersect "
         "-a <(zcat {a} "
@@ -37,25 +31,23 @@ def run_count(bed_a_gz, bed_b_path):
 
 
 bed_chr_gz = "/data/nooroka/grant/punkt3/bed-37/bed_chr_{}_sorted.bed.gz".format(sys.argv[2])
+n_mutations_in_g4 = run_count(bed_chr_gz, sys.argv[1])
 
-d2 = run_count(bed_chr_gz, sys.argv[1])
+sum_g4_length = 0
+g4_intervals_file = open(sys.argv[1], "r")
+for line in g4_intervals_file:
+    line = line.strip().split()
+    interval_length = int(line[2]) - int(line[1])
+    sum_g4_length += interval_length
+g4_intervals_file.close()
 
-d4 = 0
-op2 = open(sys.argv[1], "r")
-for line2 in op2:
-    line2 = line2.strip().split()
-    sum22 = int(line2[2]) - int(line2[1])
-    d4 += sum22
-op2.close()
+n_g4_intervals = count_lines_fast(sys.argv[1])
 
-d6 = count_lines_fast(sys.argv[1])
-
-d22 = d2
-d66 = d6
-
-w.write(
-    "chr{}".format(sys.argv[2]) + "\t" + "G4 motif all" + "\t" + "average density" + "\t"
-    + str(float(int(d22) / int(d4))) + "\taverage G4 motif/interval length" + "\t"
-    + str(float(int(d4) / int(d66))) + "\n"
+output_file.write(
+    "chr{}\tG4 motif all\taverage density\t{}\taverage G4 motif/interval length\t{}\n".format(
+        sys.argv[2],
+        float(n_mutations_in_g4 / sum_g4_length),
+        float(sum_g4_length / n_g4_intervals),
+    )
 )
-w.close()
+output_file.close()

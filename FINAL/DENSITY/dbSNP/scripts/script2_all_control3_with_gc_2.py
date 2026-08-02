@@ -1,30 +1,27 @@
-import subprocess
 import sys
+import subprocess
 
-w = open(sys.argv[4], "a")
+output_file = open(sys.argv[4], "a")
 
-# ── 1. Читаем sys.argv[2], пишем gccoords ────────────────────────────────────
-op = open(sys.argv[2], "r")
+input_file = open(sys.argv[2], "r")
 gccoords_path = (
     "/data/nooroka/grant/punkt3/stage2/gccoords/def/"
-    "gccoords_{}2defhg19_{}_all_loop7_control3_with_gc_corrected.bed".format(sys.argv[3],sys.argv[5])
+    "gccoords_{}2defhg19_{}_all_loop7_control3_with_gc_corrected.bed".format(sys.argv[3], sys.argv[5])
 )
-w3 = open(gccoords_path, "w")
-
-a = ""
-sum_control1 = 0
-for line in op:
+gccoords_file = open(gccoords_path, "w")
+avg_quadruplex_length = ""
+sum_control_length = 0
+for line in input_file:
     line = line.strip().split()
-    a = line[6]
-    line77 = int(line[7][1:-1])
-    line88 = line[8][:-1]
-    sum_control1 += int(line88) - int(line77)
-    w3.write("chr{}\t{}\t{}\n".format(sys.argv[3], line77, line88))
-w3.close()
-op.close()
+    avg_quadruplex_length = line[6]
+    interval_start = int(line[7][1:-1])
+    interval_end = line[8][:-1]
+    sum_control_length += int(interval_end) - int(interval_start)
+    gccoords_file.write("chr{}\t{}\t{}\n".format(sys.argv[3], interval_start, interval_end))
+gccoords_file.close()
+input_file.close()
 
-# ── 2. Первый bedtools: мутации × гены ──────────────────────────────────────
-cmd1 = (
+cmd_mutations_vs_g4 = (
     "bedtools intersect "
     "-a <(zcat /data/nooroka/grant/punkt3/bed-37/bed_chr_{0}_sorted.bed.gz "
     "| awk 'BEGIN{{OFS=\"\\t\"}} $3<=$2{{$3=$2+1}} 1') "
@@ -32,12 +29,12 @@ cmd1 = (
     "| sort -k4,4 -T /tmp -S 2G -u "
     "| wc -l"
 ).format(sys.argv[3], sys.argv[1])
+result_g4 = subprocess.run(
+    cmd_mutations_vs_g4, shell=True, executable="/bin/bash", capture_output=True, text=True
+)
+n_mutations_in_g4 = int(result_g4.stdout.strip())
 
-result1 = subprocess.run(cmd1, shell=True, executable="/bin/bash", capture_output=True, text=True)
-d2 = int(result1.stdout.strip())
-
-# ── 3. Второй bedtools: мутации × GC-координаты ─────────────────────────────
-cmd2 = (
+cmd_mutations_vs_control = (
     "bedtools intersect "
     "-a <(zcat /data/nooroka/grant/punkt3/bed-37/bed_chr_{0}_sorted.bed.gz "
     "| awk 'BEGIN{{OFS=\"\\t\"}} $3<=$2{{$3=$2+1}} 1') "
@@ -45,42 +42,40 @@ cmd2 = (
     "| sort -k4,4 -T /tmp -S 2G -u "
     "| wc -l"
 ).format(sys.argv[3], gccoords_path)
+result_control = subprocess.run(
+    cmd_mutations_vs_control, shell=True, executable="/bin/bash", capture_output=True, text=True
+)
+n_mutations_in_control = int(result_control.stdout.strip())
 
-result2 = subprocess.run(cmd2, shell=True, executable="/bin/bash", capture_output=True, text=True)
-d11 = int(result2.stdout.strip())
+sum_g4_length = 0
+g4_intervals_file = open(sys.argv[1], "r")
+for line in g4_intervals_file:
+    line = line.strip().split()
+    sum_g4_length += int(line[2]) - int(line[1])
+g4_intervals_file.close()
+n_g4_intervals = sum(1 for _ in open(sys.argv[1]))
 
-# ── 4. Считаем d4 ────────────────────────────────────────────────────────────
-d4 = 0
-op2 = open(sys.argv[1], "r")
-for line2 in op2:
-    line2 = line2.strip().split()
-    d4 += int(line2[2]) - int(line2[1])
-op2.close()
+if avg_quadruplex_length == "":
+    avg_quadruplex_length = 0
 
-d6 = sum(1 for _ in open(sys.argv[1]))
-
-if a == "":
-    a = 0
-# ── 5. Запись результата ──────────────────────────────────────────────────────
-if sum_control1 == 0:
-    w.write(
+if sum_control_length == 0:
+    output_file.write(
         "chr{}\tnon G4 motif\taverage density\t0"
-        "\taverage G4 motif/interval length\t{}\n".format(sys.argv[3], a)
+        "\taverage G4 motif/interval length\t{}\n".format(sys.argv[3], avg_quadruplex_length)
     )
 else:
-    w.write(
+    output_file.write(
         "chr{}\tnon G4 motif\taverage density\t{}"
         "\taverage G4 motif/interval length\t{}\n".format(
-            sys.argv[3], float(d11 / sum_control1), a
+            sys.argv[3], float(n_mutations_in_control / sum_control_length), avg_quadruplex_length
         )
     )
-
-w.write(
+output_file.write(
     "chr{}\tG4 motif all\taverage density\t{}"
     "\taverage G4 motif/interval length\t{}\n".format(
         sys.argv[3],
-        float(d2 / d4),
-        float(d4 / d6),
+        float(n_mutations_in_g4 / sum_g4_length),
+        float(sum_g4_length / n_g4_intervals),
     )
 )
-w.close()
+output_file.close()

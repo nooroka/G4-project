@@ -12,7 +12,7 @@ rule script2:
         "../densities11/densities_peaks_{version}_percent{number3}-1209.txt"
      shell:
          """
-	 python ../scripts/script2_peaks_392.py {input} {wildcards.number3} {output}
+	 python ../scripts/script2_hg19_quadr_and_hg19_and_peaks.py {input} {wildcards.number3} {output}
          """
 
 rule cat2:

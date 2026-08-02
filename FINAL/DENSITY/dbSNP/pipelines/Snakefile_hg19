@@ -10,7 +10,7 @@ rule script2:
         "../densities11/densities_{number3}_hg19-1209-2.txt"
      shell:
          """
-         python ../scripts/script2_hg192.py {input} {wildcards.number3} {output}
+         python ../scripts/script2_hg19_quadr_and_hg19_and_peaks.py {input} {wildcards.number3} {output}
          """
 rule cat2:
      input:

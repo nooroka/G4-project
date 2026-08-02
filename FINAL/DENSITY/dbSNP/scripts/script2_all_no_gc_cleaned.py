@@ -2,11 +2,10 @@ import gzip
 import subprocess
 import sys
 
-w = open(sys.argv[4], "a")
+output_file = open(sys.argv[4], "a")
 
 
 def count_lines_fast(filepath):
-    """Быстрый подсчет строк (не загружает файл в память)"""
     count = 0
     with open(filepath, "r") as f:
         for line in f:
@@ -15,11 +14,6 @@ def count_lines_fast(filepath):
 
 
 def run_count(bed_a_gz, bed_b_path):
-    """
-    bedtools intersect(-a zcat(bed_a_gz) фикс координат, -b bed_b_path)
-    | sort -k4,4 -u | wc -l
-    Возвращает число уникальных пересечений (по 4-й колонке).
-    """
     cmd = (
         "bedtools intersect "
         "-a <(zcat {a} "
@@ -35,69 +29,60 @@ def run_count(bed_a_gz, bed_b_path):
     return int(result.stdout.strip())
 
 
-# ── 1. Читаем sys.argv[2] (GC-corrected control, .gz), пишем gccoords ───────
 gccoords_path = (
     "/data/nooroka/grant/punkt3/stage2/gccoords/def/"
     "gccoords_{}2defhg19_{}_all_loop7_control2_no_gc_corrected_cleaned.bed".format(sys.argv[3], sys.argv[5])
 )
-w3 = open(gccoords_path, "w")
-a = ""
-d5 = 0
-sum1 = 0
-with gzip.open(sys.argv[2], "rt") as op:
-    for line in op:
+gccoords_file = open(gccoords_path, "w")
+avg_quadruplex_length = ""
+n_control_lines = 0
+sum_control_length = 0
+with gzip.open(sys.argv[2], "rt") as input_file:
+    for line in input_file:
         line = line.strip().split()
-        a = line[6]
-        line77 = int(line[7][1:-1])
-        line88 = line[8][:-1]
-        w3.write("chr{}\t{}\t{}\n".format(sys.argv[3], line77, line88))
-        d5 += 1
-        b = int(line88) - line77
-        sum1 += b
-w3.close()
+        avg_quadruplex_length = line[6]
+        interval_start = int(line[7][1:-1])
+        interval_end = line[8][:-1]
+        gccoords_file.write("chr{}\t{}\t{}\n".format(sys.argv[3], interval_start, interval_end))
+        n_control_lines += 1
+        interval_length = int(interval_end) - interval_start
+        sum_control_length += interval_length
+gccoords_file.close()
 
-# ── 2. Первый bedtools: мутации (argv1) × гены ───────────────────────────────
 bed_chr_gz = "/data/nooroka/grant/punkt3/bed-37/bed_chr_{}_sorted.bed.gz".format(sys.argv[3])
-d2 = run_count(bed_chr_gz, sys.argv[1])
+n_mutations_in_g4 = run_count(bed_chr_gz, sys.argv[1])
 
-# ── 3. Второй bedtools: мутации (гены) × GC-координаты ───────────────────────
-d11 = run_count(bed_chr_gz, gccoords_path)
+n_mutations_in_control = run_count(bed_chr_gz, gccoords_path)
 
-# ── 4. Считаем d4 и d6 стримингом по argv[1] ─────────────────────────────────
-d4 = 0
-d6 = 0
-with open(sys.argv[1], "r") as op2:
-    for line2 in op2:
-        line2 = line2.strip().split()
-        d4 += int(line2[2]) - int(line2[1])
-        d6 += 1
+sum_g4_length = 0
+n_g4_intervals = 0
+with open(sys.argv[1], "r") as g4_intervals_file:
+    for line in g4_intervals_file:
+        line = line.strip().split()
+        sum_g4_length += int(line[2]) - int(line[1])
+        n_g4_intervals += 1
 
-if a == "":
-    a = 0
+if avg_quadruplex_length == "":
+    avg_quadruplex_length = 0
 
-d22 = d2
-d66 = d6
-
-# ── 5. Запись результата ─────────────────────────────────────────────────────
-if d5 == 0:
-    w.write(
+if n_control_lines == 0:
+    output_file.write(
         "chr{}\tnon G4 motif\taverage density\t0"
-        "\taverage G4 motif/interval length\t{}\n".format(sys.argv[3], a)
+        "\taverage G4 motif/interval length\t{}\n".format(sys.argv[3], avg_quadruplex_length)
     )
 else:
-    w.write(
+    output_file.write(
         "chr{}\tnon G4 motif\taverage density\t{}"
         "\taverage G4 motif/interval length\t{}\n".format(
-            sys.argv[3], float(d11) / float(sum1), a
+            sys.argv[3], float(n_mutations_in_control) / float(sum_control_length), avg_quadruplex_length
         )
     )
-
-w.write(
+output_file.write(
     "chr{}\tG4 motif all\taverage density\t{}"
     "\taverage G4 motif/interval length\t{}\n".format(
         sys.argv[3],
-        float(d22) / float(d4),
-        float(d4) / float(d66),
+        float(n_mutations_in_g4) / float(sum_g4_length),
+        float(sum_g4_length) / float(n_g4_intervals),
     )
 )
-w.close()
+output_file.close()
