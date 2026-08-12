@@ -9,10 +9,6 @@ CODING = {
 }
 
 
-def script2_name(version, gene_type):
-    return "script2_{v}_{g}_less_50_control_2.py".format(v=version, g=gene_type)
-
-
 rule all:
     input:
         expand(
@@ -28,9 +24,14 @@ rule all:
             number3=SAMPLES, version=VERSIONS, gene_type=GENE_TYPES
         ),
         expand(
-            "../densities11_final/densities_{version}_{gene_type}_less_50_control.txt",
+            "../densities14_final/densities_{version}_{gene_type}_less_50_control.txt",
             version=VERSIONS, gene_type=GENE_TYPES
+        ),
+        expand(
+            "/data/nooroka/grant/punkt3/stage2/gccoords2/def/gccoords_new_{number3}2def{gene_type}_less_50_control_{version}.bed",
+            number3=SAMPLES, version=VERSIONS, gene_type=GENE_TYPES
         )
+ 
 
 
 rule script4:
@@ -88,24 +89,32 @@ rule cat:
 
 rule script2:
     input:
+        lambda wc: (
+            "../../../punkt1/stage2/merged/{coding}_quadruplexes_merged_sorted_{number3}_{version}_2.bed".format(
+                coding=CODING[wc.gene_type],
+                number3=wc.number3, version=wc.version
+            )
+        ),
         rules.cat.output
     output:
-        "../densities11/densities_{number3}_{version}_{gene_type}_less_50_control.txt"
-    params:
-        script=lambda wc: script2_name(wc.version, wc.gene_type)
+        "../densities14/densities_{number3}_{version}_{gene_type}_less_50_control.txt",
+        "/data/nooroka/grant/punkt3/stage2/gccoords2/def/gccoords_new_{number3}2def{gene_type}_less_50_control_{version}.bed",
+        "/data/nooroka/grant/punkt3/stage2/gccoords2/def/gccoords_new_gaps_{number3}2def{gene_type}_less_50_control_{version}.bed"
+
+
     shell:
         """
-        python ../scripts/{params.script} {input} {wildcards.number3} {output}
+        python ../scripts/script2.py {input} {wildcards.number3} {output}
         """
 
 
 rule cat2:
     input:
         expand(
-            "../densities11/densities_{number3}_{{version}}_{{gene_type}}_less_50_control.txt",
+            "../densities14/densities_{number3}_{{version}}_{{gene_type}}_less_50_control.txt",
             number3=SAMPLES
         )
     output:
-        "../densities11_final/densities_{version}_{gene_type}_less_50_control.txt"
+        "../densities14_final/densities_{version}_{gene_type}_less_50_control.txt"
     shell:
         "cat {input} > {output}"

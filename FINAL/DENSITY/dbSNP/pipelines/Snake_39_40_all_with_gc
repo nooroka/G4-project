@@ -6,9 +6,12 @@ rule all:
         expand("/data/nooroka/grant/punkt3/stage2/comp/comphg19{number3}_gene_GCmerged_control2_no_gc_{version}.fasta", number3=SAMPLES, version=VERSIONS),
         expand("../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_{version}.bed", number3=SAMPLES, version=VERSIONS),
         expand("../meanquadr/meanquadrhg19{number3}_my_{version}_control2_no_gc.txt", number3=SAMPLES, version=VERSIONS),
+        expand("../gccoords2/control/gccoords_percents_{number3}_my_{version}_control2_with_gc.txt", number3=SAMPLES, version=VERSIONS),
         expand("../gccoords2/control/gccoords_percents_{number3}_my_{version}_control2_no_gc.txt", number3=SAMPLES, version=VERSIONS),
-        expand("../densities13_final/densitiesGSM{version}_percent-1209_control2_no_gc.txt", version=VERSIONS),
-        expand("../gccoords2/def/gccoords_{number3}2defhg19_{version}_all_loop7_control2_no_gc_corrected.bed", number3=SAMPLES, version=VERSIONS)
+        expand("../densities13_final/densitiesGSM{version}_percent-1209_control2_with_gc.txt", version=VERSIONS),
+        expand("../gccoords2/def/gccoords_{number3}2defhg19_{version}_all_loop7_control2_with_gc_corrected.bed", number3=SAMPLES, version=VERSIONS),
+        expand("../gccoords2/def/gccoords_gaps_{number3}2defhg19_{version}_all_loop7_control2_with_gc_corrected.bed", number3=SAMPLES, version=VERSIONS)
+
 
 rule script4:
     input:
@@ -42,15 +45,23 @@ rule cat:
        cat {input.x1} > ../meanquadr/meanquadrhg19_my_{wildcards.version}_control2_no_gc.txt
        python ../scripts/windowrun13.py ../meanquadr/meanquadrhg19_my_{wildcards.version}_control2_no_gc.txt {input.x2} {output} {wildcards.number3}
        """
-
+rule coordsgc:
+     input:
+        "../gccoords2/control/gccoords_percents_{number3}_my_{version}_control2_no_gc.txt"
+     output:
+        "../gccoords2/control/gccoords_percents_{number3}_my_{version}_control2_with_gc.txt"
+     shell:
+        """
+        python ../scripts/coordsgc13.py {input} {output}
+        """
 rule script2:
      input:
         "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_{version}.bed",
-        rules.cat.output
+        rules.coordsgc.output
      output:
-        "../densities13/densitiesGSM{version}_percent{number3}-1209_control2_no_gc.txt",
-        "../gccoords2/def/gccoords_{number3}2defhg19_{version}_all_loop7_control2_no_gc_corrected.bed",
-        "../gccoords2/def/gccoords_gaps_{number3}2defhg19_{version}_all_loop7_control2_no_gc_corrected.bed"
+        "../densities13/densitiesGSM{version}_percent{number3}-1209_control2_with_gc.txt",
+        "../gccoords2/def/gccoords_{number3}2defhg19_{version}_all_loop7_control2_with_gc_corrected.bed",
+        "../gccoords2/def/gccoords_gaps_{number3}2defhg19_{version}_all_loop7_control2_with_gc_corrected.bed"
      shell:
          """
          python ../scripts/script2_all_no_with_gc_corrected2_2.py {input} {wildcards.number3} {output}
@@ -58,8 +69,8 @@ rule script2:
 
 rule cat2:
      input:
-        expand("../densities13/densitiesGSM{{version}}_percent{number3}-1209_control2_no_gc.txt", number3=SAMPLES)
+        expand("../densities13/densitiesGSM{{version}}_percent{number3}-1209_control2_with_gc.txt", number3=SAMPLES)
      output:
-        "../densities13_final/densitiesGSM{version}_percent-1209_control2_no_gc.txt"
+        "../densities13_final/densitiesGSM{version}_percent-1209_control2_with_gc.txt"
      shell:
         "cat {input} > {output}"

@@ -1,26 +1,43 @@
 import sys
 import subprocess
-
+import ast
 output_file = open(sys.argv[4], "a")
 
 input_file = open(sys.argv[2], "r")
-gccoords_path = (
-    "/data/nooroka/grant/punkt3/stage2/gccoords/def/"
-    "gccoords_{}2defhg19_{}_all_loop7_control3_with_gc_corrected.bed".format(sys.argv[3], sys.argv[5])
-)
+gccoords_path =("{}".format(sys.argv[5]))
+gaps_path = ("{}".format(sys.argv[6]))
 gccoords_file = open(gccoords_path, "w")
+gaps_file = open(gaps_path, "w")  
+ 
 avg_quadruplex_length = ""
 sum_control_length = 0
+prev_end = None  
+ 
 for line in input_file:
-    line = line.strip().split()
-    avg_quadruplex_length = line[6]
-    interval_start = int(line[7][1:-1])
-    interval_end = line[8][:-1]
-    sum_control_length += int(interval_end) - int(interval_start)
-    gccoords_file.write("chr{}\t{}\t{}\n".format(sys.argv[3], interval_start, interval_end))
+    fields = line.rstrip("\n").split("\t")
+    avg_quadruplex_length = fields[6]
+    coords_str = fields[7]
+    intervals = ast.literal_eval(coords_str)
+ 
+    for interval_start, interval_end in intervals:
+        interval_start = int(interval_start)
+        interval_end = int(interval_end)
+ 
+        if prev_end is not None and interval_start > prev_end:
+            gaps_file.write(
+                "chr{}\t{}\t{}\n".format(sys.argv[3], prev_end, interval_start)
+            )
+ 
+        sum_control_length += interval_end - interval_start
+        gccoords_file.write(
+            "chr{}\t{}\t{}\n".format(sys.argv[3], interval_start, interval_end)
+        )
+ 
+        prev_end = interval_end
+ 
 gccoords_file.close()
+gaps_file.close()
 input_file.close()
-
 cmd_mutations_vs_g4 = (
     "bedtools intersect "
     "-a <(zcat /data/nooroka/grant/punkt3/bed-37/bed_chr_{0}_sorted.bed.gz "

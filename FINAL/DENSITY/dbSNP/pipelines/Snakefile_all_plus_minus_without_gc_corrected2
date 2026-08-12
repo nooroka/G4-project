@@ -2,6 +2,7 @@ SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16
 VERSIONS = ["39", "40"]
 STRANDS  = ["minus", "plus"]
 
+
 rule all:
     input:
         expand(
@@ -17,12 +18,16 @@ rule all:
             number3=SAMPLES, version=VERSIONS, strand=STRANDS
         ),
         expand(
-            "../gccoords/control/gccoords_percents_{number3}_my_{version}_all_control2_{strand}_no_gc_corrected2.txt",
+            "../densities13_final/densities2GSM{version}_percent-1209_all_control2_{strand}_no_gc_corrected2_5.txt",
+            version=VERSIONS, strand=STRANDS
+        ),
+        expand(
+            "../gccoords2/def/gccoords_{number3}2defhg19_{version}_all_loop7_control2_no_gc_{strand}_corrected2.bed",
             number3=SAMPLES, version=VERSIONS, strand=STRANDS
         ),
         expand(
-            "../densities11_final/densities2GSM{version}_percent-1209_all_control2_{strand}_no_gc_corrected2_4.txt",
-            version=VERSIONS, strand=STRANDS
+            "../gccoords2/def/gccoords_gaps_{number3}2defhg19_{version}_all_loop7_control2_no_gc_{strand}_corrected2.bed",
+            number3=SAMPLES, version=VERSIONS, strand=STRANDS
         )
 
 
@@ -45,17 +50,17 @@ rule mean:
         "../meanquadr/meanquadrhg19{number3}_my_{version}_all_control2_{strand}_no_gc_corrected2.txt"
     shell:
         """
-        python ../scripts/mean.py {input} {output}
+        python ../scripts/mean3.py {input} {output}
         """
 
 
 rule cat:
     input:
-        x1 = expand(
+        x1=expand(
             "../meanquadr/meanquadrhg19{number3}_my_{{version}}_all_control2_{{strand}}_no_gc_corrected2.txt",
             number3=SAMPLES
         ),
-        x2 = "../comp/comphg19{number3}_gene_GCmerged_control2_{version}_all_{strand}_no_gc_corrected2.fasta"
+        x2="../comp/comphg19{number3}_gene_GCmerged_control2_{version}_all_{strand}_no_gc_corrected2.fasta"
     output:
         "../gccoords/control/gccoords_percents_{number3}_my_{version}_all_control2_{strand}_no_gc_corrected2.txt"
     shell:
@@ -70,21 +75,23 @@ rule script2:
         "../../../punkt1/stage2/merged/quadr7_chain180424_{strand}2_sorted_{number3}_{version}.bed",
         rules.cat.output
     output:
-        "../densities11/densities2GSM{version}_percent{number3}-1209_all_control2_{strand}_no_gc_corrected2_4.txt"
+        "../densities13/densities2GSM{version}_percent{number3}-1209_all_control2_{strand}_no_gc_corrected2_5.txt",
+        "../gccoords2/def/gccoords_{number3}2defhg19_{version}_all_loop7_control2_no_gc_{strand}_corrected2.bed",
+        "../gccoords2/def/gccoords_gaps_{number3}2defhg19_{version}_all_loop7_control2_no_gc_{strand}_corrected2.bed"
     shell:
         """
-        python ../scripts/script2_{wildcards.version}_all_no_gc_corrected2_2_{wildcards.strand}.py {input} {wildcards.number3} {output}
+        python ../scripts/script2.py {input} {wildcards.number3} {output}
         """
 
 
 rule cat2:
     input:
         expand(
-            "../densities11/densities2GSM{{version}}_percent{number3}-1209_all_control2_{{strand}}_no_gc_corrected2_4.txt",
+            "../densities13/densities2GSM{{version}}_percent{number3}-1209_all_control2_{{strand}}_no_gc_corrected2_5.txt",
             number3=SAMPLES
         )
     output:
-        "../densities11_final/densities2GSM{version}_percent-1209_all_control2_{strand}_no_gc_corrected2_4.txt"
+        "../densities13_final/densities2GSM{version}_percent-1209_all_control2_{strand}_no_gc_corrected2_5.txt"
     shell:
         "cat {input} > {output}"
 
