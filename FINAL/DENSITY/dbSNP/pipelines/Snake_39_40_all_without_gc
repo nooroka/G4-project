@@ -7,7 +7,7 @@ rule all:
         expand("../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_{version}.bed", number3=SAMPLES, version=VERSIONS),
         expand("../meanquadr/meanquadrhg19{number3}_my_{version}_control2_no_gc.txt", number3=SAMPLES, version=VERSIONS),
         expand("../gccoords2/control/gccoords_percents_{number3}_my_{version}_control2_no_gc.txt", number3=SAMPLES, version=VERSIONS),
-        expand("../densities13_final/densitiesGSM{version}_percent-1209_control2_no_gc.txt", version=VERSIONS),
+        expand("../densities14_final/densitiesGSM{version}_percent-1209_control2_no_gc.txt", version=VERSIONS),
         expand("../gccoords2/def/gccoords_{number3}2defhg19_{version}_all_loop7_control2_no_gc_corrected.bed", number3=SAMPLES, version=VERSIONS)
 
 rule script4:
@@ -48,18 +48,18 @@ rule script2:
         "../../../punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_{number3}_{version}.bed",
         rules.cat.output
      output:
-        "../densities13/densitiesGSM{version}_percent{number3}-1209_control2_no_gc.txt",
+        "../densities14/densitiesGSM{version}_percent{number3}-1209_control2_no_gc.txt",
         "../gccoords2/def/gccoords_{number3}2defhg19_{version}_all_loop7_control2_no_gc_corrected.bed",
         "../gccoords2/def/gccoords_gaps_{number3}2defhg19_{version}_all_loop7_control2_no_gc_corrected.bed"
      shell:
          """
-         python ../scripts/script2_all_no_with_gc_corrected2_2.py {input} {wildcards.number3} {output}
+         python ../scripts/script2.py {input} {wildcards.number3} {output}
          """
 
 rule cat2:
      input:
-        expand("../densities13/densitiesGSM{{version}}_percent{number3}-1209_control2_no_gc.txt", number3=SAMPLES)
+        expand("../densities14/densitiesGSM{{version}}_percent{number3}-1209_control2_no_gc.txt", number3=SAMPLES)
      output:
-        "../densities13_final/densitiesGSM{version}_percent-1209_control2_no_gc.txt"
+        "../densities14_final/densitiesGSM{version}_percent-1209_control2_no_gc.txt"
      shell:
         "cat {input} > {output}"
