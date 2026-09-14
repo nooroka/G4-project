@@ -5,7 +5,6 @@ import gzip
 
 
 def sum_interval_lengths(filepath):
-    """Сумма (end-start) по bed-файлу. Поддерживает .gz и обычный .bed."""
     total = 0
     try:
         opener = gzip.open if filepath.endswith('.gz') else open
@@ -20,12 +19,6 @@ def sum_interval_lengths(filepath):
 
 
 def count_unique_mutations(mut_file, bed_arg):
-    """
-    Считает число уникальных мутаций (по col4), пересёкшихся с bed_arg.
-    В отличие от исходной версии — НЕ сохраняет промежуточный файл
-    (нет tee, нет mutations_out_dir на диске): pipeline отдаёт
-    результат сразу в wc -l, ничего лишнего не пишется.
-    """
     mut_cmd = "zcat {}".format(mut_file) if mut_file.endswith(".gz") else "cat {}".format(mut_file)
     cmd = (
         "set -o pipefail; "
@@ -64,8 +57,6 @@ with open(out_file, "w") as w:
         gc_len = sum_interval_lengths(gc_file)
         b_len  = sum_interval_lengths(b_file)
 
-        # Результат пересечения считается напрямую, без записи
-        # промежуточных bed-файлов в mutations_out_dir на диск.
         mut_gc = count_unique_mutations(mut_file, gc_file)
         mut_b  = count_unique_mutations(mut_file, b_file)
 
@@ -84,15 +75,15 @@ with open(out_file, "w") as w:
     tdc = total_mut_gc / total_gccoords if total_gccoords else 0
     tdq = total_mut_b  / total_b        if total_b        else 0
 
-    print("\nРезультат:")
-    print("Сумма длин gccoords:   {}".format(total_gccoords))
-    print("Сумма длин b-файлов:   {}".format(total_b))
-    print("Мутации на gccoords:   {}".format(total_mut_gc))
-    print("Мутации на b-файлах:   {}".format(total_mut_b))
-    print("Плотность контроль:    {}".format(tdc))
-    print("Плотность quadr:       {}".format(tdq))
+    print("\nResult:")
+    print("Total gccoords length: {}".format(total_gccoords))
+    print("Total b length:        {}".format(total_b))
+    print("Mutations on gccoords: {}".format(total_mut_gc))
+    print("Mutations on b:        {}".format(total_mut_b))
+    print("Control density:       {}".format(tdc))
+    print("Quadr density:         {}".format(tdq))
 
     w.write("TOTAL\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
         total_gccoords, total_b, total_mut_gc, total_mut_b, tdc, tdq))
 
-print("\nГотово. Промежуточные файлы мутаций не сохранялись.")
+print("\nDone. Intermediate mutation files were not saved.")

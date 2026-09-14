@@ -13,7 +13,7 @@ rule sortrunnew55:
     output:
        "../final_cosmic4/hg19_non-quadr_with_gc/mutdensgene_non_quadr_2_{number}_all_loop7_genome_non_quadr_with_gc_v11-3-2.txt",      
     shell:
-       "bash ../scripts/sortrunnew55-3-6.sh <(zcat {input.x1}) {input.x2}  {output}"
+       "bash ../scripts/sortrunnew5-3-6.sh <(zcat {input.x1}) {input.x2}  {output}"
 rule cat:
      input:
         x2 = expand("../final_cosmic4/hg19_non-quadr_with_gc/mutdensgene_non_quadr_2_{number}_all_loop7_genome_non_quadr_with_gc_v11-3-2.txt",number = SAMPLES)

@@ -56,7 +56,7 @@ rule sortrunnew55:
     output:
         "../final_cosmic4/genes_non_genes/{thresh}/mutdensgene_non_quadr{thresh}_2_{number}_all_loop7_{genetype}_less_50_v11-3.txt"
     shell:
-        "bash ../scripts/sortrunnew55-3-6.sh <(zcat {input.x1}) {input.x2} {output}"
+        "bash ../scripts/sortrunnew5-3-6.sh <(zcat {input.x1}) {input.x2} {output}"
 
 
 rule cat:

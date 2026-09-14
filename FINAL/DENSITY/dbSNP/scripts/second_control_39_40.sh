@@ -2,7 +2,6 @@
 set -euo pipefail
 mkdir -p ../control ../quadr ../quadr2
 
-# Проверяет, содержит ли строка "with", но не как часть слова "without"
 has_with_not_without() {
     local name="$1"
     local stripped="${name//without/}"
@@ -13,12 +12,10 @@ has_with_not_without() {
     fi
 }
 
-# Режимы GC-коррекции, которые нужно обработать
 MODES=("no_gc" "with_gc")
 
 for j in {39..40}; do
     for i in {1..24}; do
-        # --- quadr CG filtering (не зависит от режима GC, выполняется один раз) ---
         python /data/nooroka/grant/punkt1/bioinformatics-cafe/fastaRegexFinder.py \
             -f /data/nooroka/grant/punkt1/stage2/merged/quadr7_chain180424_merged2_sorted_${i}_${j}.fasta \
             -r '[Cc][Gg]' \
@@ -33,7 +30,6 @@ for j in {39..40}; do
             | bedtools sort \
             > ../quadr2/${i}_${j}_control3_cleaned.bed
 
-        # --- control CG filtering для каждого режима (no_gc / with_gc) ---
         for MODE in "${MODES[@]}"; do
             GC_SUFFIX="${MODE}"
             INPUT_TXT="../control/gccoords_percents_${i}_my_${j}_control2_${GC_SUFFIX}.txt"
@@ -59,7 +55,6 @@ for j in {39..40}; do
 
             python target_line_number_optimized_optimized.py "$INPUT_TXT" "$OUTPUT_BED" "$OUTPUT_CLEANED"
 
-            # ── ограничение: вторая колонка >= 0.5, только для режима with_gc, только для OUTPUT_CLEANED ──
             if has_with_not_without "$MODE"; then
                 if [ -f "$OUTPUT_CLEANED" ]; then
                     awk '$2 >= 0.5' "$OUTPUT_CLEANED" > "${OUTPUT_CLEANED}.tmp" && mv "${OUTPUT_CLEANED}.tmp" "$OUTPUT_CLEANED"

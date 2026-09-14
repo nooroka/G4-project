@@ -1,0 +1,37 @@
+SAMPLES = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]
+
+rule all:
+     input:
+        expand("../merged_no_flanks/check/quadr7_chain180424_merged2_sorted_{number}_39_no_flanks.bed",number = SAMPLES),
+  
+
+rule count1:
+     input:
+         "../../GSM3003539/GSM3003539_quadr_7_6.bed"
+     output: 
+         "../quadr7_chain180424_39_no_flanks.bed"
+     shell:
+         "python ../scripts/count_no_flanks.py {input} {output}"
+
+rule merge_and_sort:
+     input:
+        rules.count1.output
+     output:
+        presorted = "../check/quadr7_chain180424_39_no_flanks_presorted.bed",
+        merged    = "../check/quadr7_chain180424_merged_39_no_flanks.bed",
+        sorted    = "../merged_no_flanks/check/quadr7_chain180424_merged2_sorted_39_no_flanks.bed"
+     shell:
+        """
+        bedtools sort -i {input} > {output.presorted}
+        bash ../scripts/merge.sh {output.presorted} {output.merged}
+        bedtools sort -i {output.merged} > {output.sorted}
+        """
+rule split:	
+     input:
+        rules.merge_and_sort.output.sorted
+     output:
+       	"../merged_no_flanks/check/quadr7_chain180424_merged2_sorted_{number}_39_no_flanks.bed"
+     shell:
+        """
+        python ../scripts/split.py {input} {output} {wildcards.number}
+        """

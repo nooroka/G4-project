@@ -1,0 +1,55 @@
+SAMPLES = [str(i) for i in range(1, 25)]
+SUFFIXES = ["39", "40"]   # <-- сюда можно добавлять любые другие значения
+
+rule all:
+    input:
+        expand("mutdensgene_quadr_no_RNAPIII_{suffix}.bed", suffix=SUFFIXES),
+        expand("mutdensgene_non-quadr_no_RNAPIII_{suffix}.bed", suffix=SUFFIXES),
+        expand("out_no_RNAPIII_{suffix}_quadr.csv", suffix=SUFFIXES),
+        expand("out_no_RNAPIII_{suffix}_non-quadr.csv", suffix=SUFFIXES)
+
+# --- объединяем мутации всех хромосом в один файл (один раз, не зависит от suffix) ---
+rule cat_all_mutations:
+    input:
+        expand(
+            "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed",
+            number=SAMPLES
+        )
+    output:
+        "tmp/all_mutations.bed"
+    shell:
+        "cat {input} > {output}"
+
+# --- quadr: один прогон на весь геном ---
+rule sortrunnew5:
+    input:
+        x1 = "/data/nooroka/grant/punkt1/quadr_no_RNAPIII_{suffix}.bed",
+        x2 = "tmp/all_mutations.bed"
+    output:
+        "mutdensgene_quadr_no_RNAPIII_{suffix}.bed"
+    shell:
+        "bash ../punkt3/stage2/scripts/sortrunnew5-3-6.sh {input.x1} {input.x2} {output}"
+
+# --- non-quadr (control): один прогон на весь геном ---
+rule sortrunnew55:
+    input:
+        x1 = "control_without_rnapIII_{suffix}_merged.bed",
+        x2 = "tmp/all_mutations.bed"
+    output:
+        "mutdensgene_non-quadr_no_RNAPIII_{suffix}.bed"
+    shell:
+        "bash ../punkt3/stage2/scripts/sortrunnew55-3-6.sh {input.x1} {input.x2} {output}"
+
+# --- расчёт плотности мутаций по хромосомам ---
+rule density:
+    input:
+        x1 = "mutdensgene_quadr_no_RNAPIII_{suffix}.bed",
+        x2 = "mutdensgene_non-quadr_no_RNAPIII_{suffix}.bed"
+    output:
+        y1 = "out_no_RNAPIII_{suffix}_quadr.csv",
+        y2 = "out_no_RNAPIII_{suffix}_non-quadr.csv"
+    shell:
+        """
+        python ../punkt3/stage2/scripts/density_per_ch_chunks.py {input.x1} {output.y1}
+        python ../punkt3/stage2/scripts/density_per_ch_chunks.py {input.x2} {output.y2}
+        """

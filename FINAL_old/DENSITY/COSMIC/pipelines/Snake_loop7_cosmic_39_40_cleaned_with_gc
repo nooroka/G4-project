@@ -1,0 +1,59 @@
+SAMPLES = [str(i) for i in range(1, 25)]
+SUFFIXES = ["39", "40"]
+
+rule all:
+    input:
+        expand("../final_cosmic2/cleaned_with_gc/{suffix}/final/mutdensgene_quadr{suffix}_2-from_all_loop7_control2_cleaned_with_gc_v10-3.txt", suffix=SUFFIXES),
+        expand("../final_cosmic2/cleaned_with_gc/{suffix}/final/mutdensgene_non_quadr{suffix}_2-from_all_loop7_control2_cleaned_with_gc_v10-3.txt", suffix=SUFFIXES),
+        expand("../final_cosmic2/cleaned_with_gc/{suffix}/mutdensgene_quadr{suffix}_2_{number}_all_loop7_control2_cleaned_with_gc_v10-3.txt", suffix=SUFFIXES, number=SAMPLES),
+        expand("../final_cosmic2/cleaned_with_gc/{suffix}/mutdensgene_non_quadr{suffix}_2_{number}_all_loop7_control2_cleaned_with_gc_v10-3.txt", suffix=SUFFIXES, number=SAMPLES),
+        expand("../final_cosmic2/cleaned_with_gc/{suffix}/final/out_control2_cleaned_with_gc_{suffix}_quadr.csv", suffix=SUFFIXES),
+        expand("../final_cosmic2/cleaned_with_gc/{suffix}/final/out_control2_cleaned_with_gc_{suffix}_non-quadr.csv", suffix=SUFFIXES)
+
+
+rule sortrunnew5:
+    input:
+        x1 = "/data/nooroka/grant/punkt3/stage2/gccoords/quadr2/{number}_{suffix}_control3_cleaned.bed",
+        x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
+    output:
+        "../final_cosmic2/cleaned_with_gc/{suffix}/mutdensgene_quadr{suffix}_2_{number}_all_loop7_control2_cleaned_with_gc_v10-3.txt"
+    shell:
+        "bash ../scripts/sortrunnew5-3-6.sh {input.x1} {input.x2} {output}"
+
+
+rule sortrunnew55:
+    input:
+        x1 = "../gccoords/def/gccoords_{number}2defhg19_{suffix}_all_loop7_control2_with_gc_corrected_cleaned.bed.gz",
+        x2 = "/mnt/work/nooroka/punkt2/COSMIC_102/chr{number}_coordinates_shifted_tab_hgvsg_new_no_header.bed"
+    output:
+        "../final_cosmic2/cleaned_with_gc/{suffix}/mutdensgene_non_quadr{suffix}_2_{number}_all_loop7_control2_cleaned_with_gc_v10-3.txt"
+    shell:
+        "bash ../scripts/sortrunnew55-3-6.sh <(zcat {input.x1}) {input.x2} {output}"
+
+
+rule cat:
+    input:
+        x1 = expand("../final_cosmic2/cleaned_with_gc/{{suffix}}/mutdensgene_quadr{{suffix}}_2_{number}_all_loop7_control2_cleaned_with_gc_v10-3.txt", number=SAMPLES),
+        x2 = expand("../final_cosmic2/cleaned_with_gc/{{suffix}}/mutdensgene_non_quadr{{suffix}}_2_{number}_all_loop7_control2_cleaned_with_gc_v10-3.txt", number=SAMPLES)
+    output:
+        y1 = "../final_cosmic2/cleaned_with_gc/{suffix}/final/mutdensgene_quadr{suffix}_2-from_all_loop7_control2_cleaned_with_gc_v10-3.txt",
+        y2 = "../final_cosmic2/cleaned_with_gc/{suffix}/final/mutdensgene_non_quadr{suffix}_2-from_all_loop7_control2_cleaned_with_gc_v10-3.txt"
+    shell:
+        """
+        cat {input.x1} > {output.y1}
+        cat {input.x2} > {output.y2}
+        """
+
+
+rule density:
+    input:
+        x1 = "../final_cosmic2/cleaned_with_gc/{suffix}/final/mutdensgene_quadr{suffix}_2-from_all_loop7_control2_cleaned_with_gc_v10-3.txt",
+        x2 = "../final_cosmic2/cleaned_with_gc/{suffix}/final/mutdensgene_non_quadr{suffix}_2-from_all_loop7_control2_cleaned_with_gc_v10-3.txt"
+    output:
+        y1 = "../final_cosmic2/cleaned_with_gc/{suffix}/final/out_control2_cleaned_with_gc_{suffix}_quadr.csv",
+        y2 = "../final_cosmic2/cleaned_with_gc/{suffix}/final/out_control2_cleaned_with_gc_{suffix}_non-quadr.csv"
+    shell:
+        """
+        python ../scripts/density_per_ch_chunks.py {input.x1} {output.y1}
+        python ../scripts/density_per_ch_chunks.py {input.x2} {output.y2}
+        """

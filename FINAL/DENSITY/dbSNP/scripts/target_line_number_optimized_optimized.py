@@ -5,17 +5,10 @@ import os
 
 
 def smart_open(path, mode='r'):
-    """
-    Открывает файл, автоматически определяя:
-    - '-' -> stdin/stdout
-    - '.gz' по расширению -> gzip, текстовый режим
-    - иначе -> обычный open
-    """
     if path == '-':
         return sys.stdin if 'r' in mode else sys.stdout
 
     if path.endswith('.gz'):
-        # 'rt'/'wt' — текстовый режим для gzip (строки, не байты)
         return gzip.open(path, mode + 't')
 
     return open(path, mode)
@@ -30,13 +23,11 @@ def read_lines(path):
     try:
         return f.readlines()
     finally:
-        # stdin закрывать не нужно
         if path != '-':
             f.close()
 
 
 def select_lines(file_path, target_line_numbers_path, output_path):
-    # Нельзя читать stdin дважды — проверяем конфликт
     if file_path == '-' and target_line_numbers_path == '-':
         print("Error: both inputs cannot be stdin", file=sys.stderr)
         sys.exit(1)

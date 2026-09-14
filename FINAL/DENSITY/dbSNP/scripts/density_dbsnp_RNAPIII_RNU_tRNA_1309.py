@@ -5,12 +5,6 @@ import gzip
 
 
 def sum_interval_lengths_for_chr(bed_file, chr_name):
-    """
-    Сумма (end-start) по bed-файлу, но только для одной хромосомы.
-    В отличие от исходной версии — фильтрация по хромосоме и суммирование
-    длин делаются одним awk-пайпом, без записи отфильтрованного куска
-    control-файла во временный файл на диске.
-    """
     cmd = (
         "awk -v c=\"{c}\" '$1==c {{s += $3-$2}} END{{print s+0}}' {f}"
     ).format(c=chr_name, f=bed_file)
@@ -23,13 +17,6 @@ def sum_interval_lengths_for_chr(bed_file, chr_name):
 
 
 def count_unique_mutations(mut_file, control_bed, chr_name):
-    """
-    Считает число уникальных мутаций (по col4), пересёкшихся с control_bed,
-    отфильтрованным по нужной хромосоме.
-    В отличие от исходной версии — НЕ создаётся tmp_control-файл на диске:
-    фильтрация control-bed по хромосоме идёт через process substitution
-    (<(awk ...)), а мутации подаются в bedtools через stdin.
-    """
     mut_cmd = "zcat {}".format(mut_file) if mut_file.endswith(".gz") else "cat {}".format(mut_file)
     cmd = (
         "set -o pipefail; "
@@ -65,8 +52,6 @@ with open(out_file, "w") as w:
 
         b_len  = sum_interval_lengths_for_chr(control_bed, chr_name)
 
-        # Пересечение считается напрямую через пайп, без промежуточных
-        # bed-файлов на диске (ни для control, ни для мутаций).
         mut_gc = count_unique_mutations(mut_file, control_bed, chr_name)
 
         density = mut_gc / b_len if b_len else 0
@@ -80,11 +65,11 @@ with open(out_file, "w") as w:
 
     total_density = total_mut / total_len if total_len else 0
 
-    print("\nРезультат:")
-    print("Сумма длин control:    {}".format(total_len))
-    print("Мутации на control:    {}".format(total_mut))
-    print("Плотность общая:       {}".format(total_density))
+    print("\nResult:")
+    print("Total control length:  {}".format(total_len))
+    print("Mutations on control:  {}".format(total_mut))
+    print("Overall density:       {}".format(total_density))
 
     w.write("TOTAL\t{}\t{}\t{}\n".format(total_len, total_mut, total_density))
 
-print("\nГотово. Промежуточные bed-файлы не сохранялись.")
+print("\nDone. Intermediate bed files were not saved.")
